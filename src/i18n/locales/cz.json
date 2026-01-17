@@ -1,0 +1,66 @@
+{
+  "welcome": "Vítejte ve Vite + React",
+  "count": "počet je {{count}}",
+  "edit": "Upravit",
+  "save": "uložit pro testování HMR",
+  "clickLogos": "Klikněte na loga Vite a React, abyste se dozvěděli více",
+  "viteLogo": "Vite logo",
+  "reactLogo": "React logo",
+  "routes": {
+    "login": "prihlaseni",
+    "register": "registrace",
+    "homepage": "domov"
+  },
+  "pages": {
+    "login": {
+      "title": "Přihlášení",
+      "email": "Email",
+      "password": "Heslo",
+      "submit": "Přihlásit se",
+      "submitting": "Přihlašuji...",
+      "success": "Přihlášení úspěšné!",
+      "error": "Přihlášení selhalo. Zkontrolujte své přihlašovací údaje.",
+      "validation": {
+        "emailRequired": "Email je povinný",
+        "emailInvalid": "Zadejte platnou emailovou adresu",
+        "passwordRequired": "Heslo je povinné",
+        "passwordMinLength": "Heslo musí mít alespoň 4 znaky"
+      }
+    },
+    "register": {
+      "title": "Registrace",
+      "email": "Email",
+      "password": "Heslo",
+      "firstName": "Jméno",
+      "lastName": "Příjmení",
+      "submit": "Registrovat se",
+      "submitting": "Registruji...",
+      "validation": {
+        "emailRequired": "Email je povinný",
+        "emailInvalid": "Zadejte platnou emailovou adresu",
+        "passwordRequired": "Heslo je povinné",
+        "passwordMinLength": "Heslo musí mít alespoň 4 znaky",
+        "passwordPattern": "Heslo musí obsahovat alespoň jedno velké písmeno, jedno malé písmeno a jedno číslo",
+        "firstNameRequired": "Jméno je povinné",
+        "firstNameMinLength": "Jméno musí mít alespoň 2 znaky",
+        "lastNameRequired": "Příjmení je povinné",
+        "lastNameMinLength": "Příjmení musí mít alespoň 2 znaky"
+      }
+    },
+    "homepage": {
+      "title": "Vítejte ve Vašem Dashboardu",
+      "welcome": "Vítejte",
+      "description": "Toto je chráněná stránka. Pouze přihlášení uživatelé k ní mají přístup."
+    },
+    "logout": {
+      "successMessage": "Odhlášení úspěšné",
+      "errorMessage": "Odhlášení selhalo. Zkuste to znovu."
+    }
+  },
+  "language": {
+    "select": "Vyberte jazyk",
+    "en": "Angličtina",
+    "sk": "Slovenština",
+    "cz": "Čeština"
+  }
+}

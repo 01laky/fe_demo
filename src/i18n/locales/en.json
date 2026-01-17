@@ -1,0 +1,66 @@
+{
+  "welcome": "Welcome to Vite + React",
+  "count": "count is {{count}}",
+  "edit": "Edit",
+  "save": "save to test HMR",
+  "clickLogos": "Click on the Vite and React logos to learn more",
+  "viteLogo": "Vite logo",
+  "reactLogo": "React logo",
+  "routes": {
+    "login": "login",
+    "register": "register",
+    "homepage": "homepage"
+  },
+  "pages": {
+    "login": {
+      "title": "Login",
+      "email": "Email",
+      "password": "Password",
+      "submit": "Sign In",
+      "submitting": "Logging in...",
+      "success": "Login successful!",
+      "error": "Login failed. Please check your credentials.",
+      "validation": {
+        "emailRequired": "Email is required",
+        "emailInvalid": "Please enter a valid email address",
+        "passwordRequired": "Password is required",
+        "passwordMinLength": "Password must be at least 4 characters"
+      }
+    },
+    "register": {
+      "title": "Register",
+      "email": "Email",
+      "password": "Password",
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "submit": "Sign Up",
+      "submitting": "Registering...",
+      "validation": {
+        "emailRequired": "Email is required",
+        "emailInvalid": "Please enter a valid email address",
+        "passwordRequired": "Password is required",
+        "passwordMinLength": "Password must be at least 4 characters",
+        "passwordPattern": "Password must contain at least one uppercase letter, one lowercase letter, and one number",
+        "firstNameRequired": "First name is required",
+        "firstNameMinLength": "First name must be at least 2 characters",
+        "lastNameRequired": "Last name is required",
+        "lastNameMinLength": "Last name must be at least 2 characters"
+      }
+    },
+    "homepage": {
+      "title": "Welcome to Your Dashboard",
+      "welcome": "Welcome",
+      "description": "This is a protected page. Only authenticated users can access it."
+    },
+    "logout": {
+      "successMessage": "Logged out successfully",
+      "errorMessage": "Logout failed. Please try again."
+    }
+  },
+  "language": {
+    "select": "Select Language",
+    "en": "English",
+    "sk": "Slovak",
+    "cz": "Czech"
+  }
+}

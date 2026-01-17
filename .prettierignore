@@ -1,0 +1,20 @@
+# Dependencies
+node_modules
+.yarn
+.pnp.*
+
+# Build outputs
+dist
+dist-ssr
+*.local
+
+# Generated files
+openapi.json
+src/api/**/*
+
+# Logs
+*.log
+
+# Editor
+.vscode
+.idea

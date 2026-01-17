@@ -1,0 +1,43 @@
+services:
+  # Development server
+  fe-demo-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: fe-demo-dev
+    ports:
+      - "8081:8081"
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/.yarn/cache
+      - /app/.pnp.cjs
+    environment:
+      - VITE_API_URL=${VITE_API_URL:-http://localhost:8000}
+      - VITE_API_HTTPS_URL=${VITE_API_HTTPS_URL:-https://localhost:8001}
+      - VITE_APP_NAME=${VITE_APP_NAME:-Be Demo Frontend}
+      - VITE_APP_VERSION=${VITE_APP_VERSION:-1.0.0}
+      - VITE_PORT=${VITE_PORT:-8081}
+    env_file:
+      - .env
+    restart: unless-stopped
+    networks:
+      - fe-demo-network
+
+  # Production server
+  fe-demo-prod:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: fe-demo-prod
+    ports:
+      - "8080:80"
+    restart: unless-stopped
+    networks:
+      - fe-demo-network
+    profiles:
+      - production
+
+networks:
+  fe-demo-network:
+    driver: bridge

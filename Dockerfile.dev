@@ -1,0 +1,31 @@
+# Development Dockerfile for React Vite application
+# Using npm instead of yarn to avoid rollup native module resolution issues
+
+FROM node:20-slim
+
+WORKDIR /app
+
+# Copy package files
+COPY package.json ./
+COPY package-lock.json* ./
+
+# Install dependencies using npm (better native module support)
+RUN npm install
+
+# Install rollup native modules for Linux (needed for Debian-based images)
+# Detect platform and install correct module
+RUN ARCH=$(uname -m) && \
+    if [ "$ARCH" = "aarch64" ] || [ "$ARCH" = "arm64" ]; then \
+      npm install -D @rollup/rollup-linux-arm64-gnu || true; \
+    else \
+      npm install -D @rollup/rollup-linux-x64-gnu || true; \
+    fi
+
+# Copy source code
+COPY . .
+
+# Expose Vite dev server port
+EXPOSE 8081
+
+# Start development server using npm
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0", "--port", "8081"]

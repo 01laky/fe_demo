@@ -1,0 +1,66 @@
+{
+  "welcome": "Vitajte vo Vite + React",
+  "count": "počet je {{count}}",
+  "edit": "Upraviť",
+  "save": "uložiť na testovanie HMR",
+  "clickLogos": "Kliknite na logá Vite a React, aby ste sa dozvedeli viac",
+  "viteLogo": "Vite logo",
+  "reactLogo": "React logo",
+  "routes": {
+    "login": "prihlasenie",
+    "register": "registracia",
+    "homepage": "domov"
+  },
+  "pages": {
+    "login": {
+      "title": "Prihlásenie",
+      "email": "Email",
+      "password": "Heslo",
+      "submit": "Prihlásiť sa",
+      "submitting": "Prihlasujem...",
+      "success": "Prihlásenie úspešné!",
+      "error": "Prihlásenie zlyhalo. Skontrolujte svoje prihlasovacie údaje.",
+      "validation": {
+        "emailRequired": "Email je povinný",
+        "emailInvalid": "Zadajte platnú emailovú adresu",
+        "passwordRequired": "Heslo je povinné",
+        "passwordMinLength": "Heslo musí mať aspoň 4 znaky"
+      }
+    },
+    "register": {
+      "title": "Registrácia",
+      "email": "Email",
+      "password": "Heslo",
+      "firstName": "Meno",
+      "lastName": "Priezvisko",
+      "submit": "Registrovať sa",
+      "submitting": "Registrujem...",
+      "validation": {
+        "emailRequired": "Email je povinný",
+        "emailInvalid": "Zadajte platnú emailovú adresu",
+        "passwordRequired": "Heslo je povinné",
+        "passwordMinLength": "Heslo musí mať aspoň 4 znaky",
+        "passwordPattern": "Heslo musí obsahovať aspoň jedno veľké písmeno, jedno malé písmeno a jedno číslo",
+        "firstNameRequired": "Meno je povinné",
+        "firstNameMinLength": "Meno musí mať aspoň 2 znaky",
+        "lastNameRequired": "Priezvisko je povinné",
+        "lastNameMinLength": "Priezvisko musí mať aspoň 2 znaky"
+      }
+    },
+    "homepage": {
+      "title": "Vitajte vo Vašom Dashboarde",
+      "welcome": "Vitajte",
+      "description": "Toto je chránená stránka. Iba prihlásení používatelia k nej majú prístup."
+    },
+    "logout": {
+      "successMessage": "Odhlásenie úspešné",
+      "errorMessage": "Odhlásenie zlyhalo. Skúste to znova."
+    }
+  },
+  "language": {
+    "select": "Vyberte jazyk",
+    "en": "Angličtina",
+    "sk": "Slovenčina",
+    "cz": "Čeština"
+  }
+}
