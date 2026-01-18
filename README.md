@@ -36,6 +36,13 @@ The Frontend (fe_demo) is a modern React application built with TypeScript and V
   - Type-safe API calls
   - Error handling and retry logic
 
+- **Face Path Routing (Multi-Tenant Support)**
+  - Automatic face prefix extraction from URL (e.g., `/acme-corp/dashboard`)
+  - URL transformation: `/api/users` → `/api/acme-corp/users`
+  - Language prefix handling: correctly identifies `/en/login` vs `/acme-corp/en/login`
+  - Axios interceptors for automatic face path injection
+  - Comprehensive test coverage (26 tests)
+
 ## Technologies
 
 - **React 18** - UI library
@@ -55,7 +62,10 @@ fe_demo/
 │   ├── api/                # Auto-generated API client
 │   │   ├── services/       # API service classes
 │   │   ├── models/         # TypeScript models
-│   │   └── core/           # API core utilities
+│   │   ├── core/           # API core utilities
+│   │   ├── config.ts       # API client configuration with face path routing
+│   │   ├── ApiClient.ts    # API client wrapper
+│   │   └── __tests__/      # API tests (face path routing)
 │   ├── components/         # React components
 │   │   ├── radix/          # Custom UI components
 │   │   └── ...             # Other components
@@ -229,6 +239,66 @@ const loginResult = await AuthService.login({
 });
 ```
 
+## Face Path Routing (Multi-Tenant Support)
+
+The frontend implements automatic face path routing for multi-tenant support. This allows the application to automatically scope API requests to specific tenants based on the URL path.
+
+### How It Works
+
+When the application makes API requests, the axios interceptor (configured in `src/api/config.ts`) automatically:
+
+1. **Extracts face path** from `window.location.pathname` (e.g., `/acme-corp/dashboard` → `acme-corp`)
+2. **Handles language prefixes** correctly (e.g., `/en/login` → no face path, `/acme-corp/en/login` → `acme-corp`)
+3. **Transforms API URLs** from `/api/users` to `/api/acme-corp/users`
+4. **Adds face path** to all API requests automatically
+
+### URL Examples
+
+```
+# Language-only route (no face path)
+/en/login → API requests: /api/users (no face path added)
+
+# Face-prefixed route
+/acme-corp/dashboard → API requests: /api/acme-corp/users
+
+# Face + language route
+/acme-corp/en/login → API requests: /api/acme-corp/users
+```
+
+### Implementation Details
+
+The face path routing is implemented via:
+
+- **Axios Interceptors**: Global request interceptor in `src/api/config.ts`
+- **Face Path Extraction**: Logic to identify face prefix vs language prefix
+- **URL Transformation**: Automatic insertion of face path after `/api/` prefix
+- **Language Support**: Correctly handles i18n routes with language prefixes
+
+### Configuration
+
+Face path routing is automatically configured when `configureApiClient()` is called in `main.tsx`:
+
+```typescript
+import { configureApiClient } from './api/config';
+
+configureApiClient(); // Sets up face path routing automatically
+```
+
+### Testing
+
+Face path routing has comprehensive test coverage (26 tests) in `src/api/__tests__/facePathRouting.test.ts`:
+
+- Face path extraction from various URL formats
+- URL transformation logic
+- Language prefix handling
+- Edge cases and error scenarios
+
+Run tests:
+
+```bash
+yarn test
+```
+
 ## Development Workflow
 
 1. **Start backend**: Ensure backend API is running (via `be_demo` or root `start-all-dev.sh`)
@@ -266,7 +336,8 @@ yarn test:coverage
 ```
 
 Tests are located in:
-- `src/utils/__tests__/` - Utility function tests
+- `src/utils/__tests__/` - Utility function tests (route translations)
+- `src/api/__tests__/` - API client tests (face path routing)
 - Component tests (when added)
 
 ## Code Quality
