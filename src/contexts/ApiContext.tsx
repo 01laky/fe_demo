@@ -55,7 +55,7 @@ export interface TApiContextProviderProps {
 export function ApiContextProvider({
   children,
   accessToken: propAccessToken,
-}: TApiContextProviderProps): JSX.Element {
+}: TApiContextProviderProps): React.ReactElement {
   // Try to get token from prop or from context/hooks if needed
   // For now, we'll use prop token or null
   // In a more sophisticated setup, you might want to integrate with AuthContext

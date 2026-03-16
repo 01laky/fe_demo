@@ -6,6 +6,8 @@ const routeKeys: Record<string, string> = {
   register: 'routes.register',
   homepage: 'routes.homepage',
   chat: 'routes.chat',
+  profile: 'routes.profile',
+  users: 'routes.users',
 };
 
 // Map of route keys to English route names (reverse lookup)
@@ -14,6 +16,8 @@ const routeKeyToEnglish: Record<string, string> = {
   'routes.register': 'register',
   'routes.homepage': 'homepage',
   'routes.chat': 'chat',
+  'routes.profile': 'profile',
+  'routes.users': 'users',
 };
 
 /**
@@ -25,7 +29,7 @@ const routeKeyToEnglish: Record<string, string> = {
  */
 export function getTranslatedRoute(
   englishPath: string,
-  language: SupportedLanguage,
+  _language: SupportedLanguage,
   t: (key: string) => string
 ): string {
   // If path is empty or root, return empty
@@ -61,7 +65,7 @@ export function getTranslatedRoute(
  */
 export function getEnglishRoute(
   translatedPath: string,
-  language: SupportedLanguage,
+  _language: SupportedLanguage,
   t: (key: string) => string
 ): string {
   // If path is empty or root, return empty

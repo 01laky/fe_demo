@@ -10,7 +10,9 @@
     "login": "login",
     "register": "register",
     "homepage": "homepage",
-    "chat": "chat"
+    "chat": "chat",
+    "profile": "profile",
+    "users": "users"
   },
   "pages": {
     "login": {
@@ -64,8 +66,32 @@
       "ai": "AI"
     },
     "logout": {
+      "title": "Logout",
       "successMessage": "Logged out successfully",
-      "errorMessage": "Logout failed. Please try again."
+      "errorMessage": "Logout failed. Please try again.",
+      "sessionExpired": "Your session has expired. Please log in again."
+    },
+    "profile": {
+      "title": "Profile"
+    },
+    "users": {
+      "title": "Users",
+      "loading": "Loading users...",
+      "loadError": "Failed to load users",
+      "noUsers": "No users found",
+      "gridView": "Grid view",
+      "listView": "List view"
+    },
+    "userDetail": {
+      "title": "User profile",
+      "id": "ID",
+      "email": "Email",
+      "firstName": "First name",
+      "lastName": "Last name",
+      "createdAt": "Created at",
+      "loading": "Loading...",
+      "notFound": "User not found",
+      "error": "Failed to load user"
     }
   },
   "face": {
@@ -80,5 +106,61 @@
   },
   "footer": {
     "rights": "All rights reserved."
+  },
+  "friendRequests": {
+    "incoming": "Friend requests",
+    "addFriend": "Add friend",
+    "searchPlaceholder": "Search by name or email...",
+    "noSearchResults": "No users match your search",
+    "pageInfo": "Page {{page}} of {{total}} ({{count}} users)",
+    "prevPage": "Previous page",
+    "nextPage": "Next page",
+    "loading": "Loading...",
+    "loadError": "Failed to load",
+    "noRequests": "No pending requests",
+    "noUsersToAdd": "No users to add",
+    "accept": "Accept",
+    "reject": "Reject",
+    "sendRequest": "Send request",
+    "accepted": "Request accepted",
+    "rejected": "Request rejected",
+    "sent": "Request sent",
+    "acceptError": "Failed to accept",
+    "rejectError": "Failed to reject",
+    "sendError": "Failed to send"
+  },
+  "messenger": {
+    "title": "Messenger",
+    "conversations": "Conversations",
+    "chats": "Chats",
+    "messageRequests": "Message requests",
+    "messageRequest": "Message request",
+    "selectConversation": "Select a conversation",
+    "noConversations": "No conversations yet",
+    "loading": "Loading...",
+    "loadError": "Failed to load",
+    "connected": "Connected",
+    "connecting": "Connecting...",
+    "disconnected": "Disconnected",
+    "placeholder": "Type a message...",
+    "send": "Send",
+    "sendError": "Failed to send",
+    "accept": "Accept",
+    "reject": "Reject",
+    "requestAccepted": "Request accepted",
+    "requestRejected": "Request rejected",
+    "requestAcceptError": "Failed to accept",
+    "requestRejectError": "Failed to reject",
+    "you": "You",
+    "read": "Read"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "loading": "Loading...",
+    "loadError": "Failed to load",
+    "noNotifications": "No notifications yet"
+  },
+  "common": {
+    "back": "Back"
   }
 }

@@ -10,7 +10,9 @@
     "login": "prihlaseni",
     "register": "registrace",
     "homepage": "domov",
-    "chat": "chat"
+    "chat": "chat",
+    "profile": "profil",
+    "users": "uzivatele"
   },
   "pages": {
     "login": {
@@ -64,8 +66,32 @@
       "ai": "AI"
     },
     "logout": {
+      "title": "Odhlásit se",
       "successMessage": "Odhlášení úspěšné",
-      "errorMessage": "Odhlášení selhalo. Zkuste to znovu."
+      "errorMessage": "Odhlášení selhalo. Zkuste to znovu.",
+      "sessionExpired": "Platnost přihlášení vypršela. Přihlaste se znovu."
+    },
+    "profile": {
+      "title": "Profil"
+    },
+    "users": {
+      "title": "Uživatelé",
+      "loading": "Načítání uživatelů...",
+      "loadError": "Nepodařilo se načíst uživatele",
+      "noUsers": "Žádní uživatelé",
+      "gridView": "Mřížka",
+      "listView": "Seznam"
+    },
+    "userDetail": {
+      "title": "Profil uživatele",
+      "id": "ID",
+      "email": "Email",
+      "firstName": "Jméno",
+      "lastName": "Příjmení",
+      "createdAt": "Vytvořeno",
+      "loading": "Načítání...",
+      "notFound": "Uživatel nenalezen",
+      "error": "Nepodařilo se načíst uživatele"
     }
   },
   "face": {
@@ -80,5 +106,61 @@
   },
   "footer": {
     "rights": "Všechna práva vyhrazena."
+  },
+  "friendRequests": {
+    "incoming": "Žádosti o přátelství",
+    "addFriend": "Přidat přítele",
+    "searchPlaceholder": "Hledat podle jména nebo e-mailu...",
+    "noSearchResults": "Žádní uživatelé neodpovídají hledání",
+    "pageInfo": "Stránka {{page}} z {{total}} ({{count}} uživatelů)",
+    "prevPage": "Předchozí stránka",
+    "nextPage": "Další stránka",
+    "loading": "Načítání...",
+    "loadError": "Nepodařilo se načíst",
+    "noRequests": "Žádné čekající žádosti",
+    "noUsersToAdd": "Žádní uživatelé k přidání",
+    "accept": "Přijmout",
+    "reject": "Odmítnout",
+    "sendRequest": "Odeslat žádost",
+    "accepted": "Žádost přijata",
+    "rejected": "Žádost odmítnuta",
+    "sent": "Žádost odeslána",
+    "acceptError": "Nepodařilo se přijmout",
+    "rejectError": "Nepodařilo se odmítnout",
+    "sendError": "Nepodařilo se odeslat"
+  },
+  "messenger": {
+    "title": "Messenger",
+    "conversations": "Konverzace",
+    "chats": "Chaty",
+    "messageRequests": "Žádosti o zprávu",
+    "messageRequest": "Žádost o zprávu",
+    "selectConversation": "Vyberte konverzaci",
+    "noConversations": "Zatím žádné konverzace",
+    "loading": "Načítání...",
+    "loadError": "Nepodařilo se načíst",
+    "connected": "Připojeno",
+    "connecting": "Připojování...",
+    "disconnected": "Odpojeno",
+    "placeholder": "Napište zprávu...",
+    "send": "Odeslat",
+    "sendError": "Nepodařilo se odeslat",
+    "accept": "Přijmout",
+    "reject": "Odmítnout",
+    "requestAccepted": "Žádost přijata",
+    "requestRejected": "Žádost odmítnuta",
+    "requestAcceptError": "Nepodařilo se přijmout",
+    "requestRejectError": "Nepodařilo se odmítnout",
+    "you": "Vy",
+    "read": "Přečteno"
+  },
+  "notifications": {
+    "title": "Oznámení",
+    "loading": "Načítání...",
+    "loadError": "Nepodařilo se načíst",
+    "noNotifications": "Zatím žádná oznámení"
+  },
+  "common": {
+    "back": "Zpět"
   }
 }

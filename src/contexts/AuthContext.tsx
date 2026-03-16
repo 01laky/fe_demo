@@ -2,14 +2,17 @@ import { createContext, useContext, useState, useEffect, useCallback } from 'rea
 import type { ReactNode } from 'react';
 import { setAuthToken } from '../api/config';
 import { logger } from '../utils/logger';
+import { isTokenExpired } from '../utils/jwtUtils';
 import { toast } from 'react-toastify';
 import { useTranslation } from 'react-i18next';
+import { useQueryClient } from '@tanstack/react-query';
 import {
   useLogin as useLoginMutation,
   useLogout as useLogoutMutation,
   useAuthToken,
   useRefreshToken as useRefreshTokenMutation,
 } from '../hooks/api/useAuthApi';
+import { authKeys } from '../hooks/api/useAuthApi';
 
 /**
  * User information interface
@@ -58,6 +61,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const { t } = useTranslation('common');
+  const queryClient = useQueryClient();
 
   // React Query hooks
   const loginMutation = useLoginMutation();
@@ -66,7 +70,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const { data: tokenData, isLoading: tokenLoading } = useAuthToken();
 
   /**
-   * Load authentication state from localStorage on mount and sync with React Query
+   * Load authentication state from localStorage on mount
+   * Clears token if expired - no point showing user as "logged in" with invalid session
    */
   useEffect(() => {
     const loadAuthState = () => {
@@ -74,7 +79,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const storedToken = localStorage.getItem(STORAGE_KEYS.TOKEN);
         const storedUser = localStorage.getItem(STORAGE_KEYS.USER);
 
-        if (storedToken) {
+        if (storedToken && !isTokenExpired(storedToken)) {
           setToken(storedToken);
           setAuthToken(storedToken);
           setIsAuthenticated(true);
@@ -86,6 +91,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               logger.warn('Failed to parse stored user data', { error: String(e) });
             }
           }
+        } else if (storedToken && isTokenExpired(storedToken)) {
+          localStorage.removeItem(STORAGE_KEYS.TOKEN);
+          localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
+          localStorage.removeItem(STORAGE_KEYS.USER);
+          setAuthToken(null);
+          queryClient.removeQueries({ queryKey: authKeys.all });
         }
       } catch (error) {
         logger.error('Failed to load auth state', error);
@@ -95,7 +106,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
 
     loadAuthState();
-  }, []);
+  }, [queryClient]);
 
   // Sync token from React Query
   useEffect(() => {
@@ -109,6 +120,47 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setIsAuthenticated(false);
     }
   }, [tokenData, tokenLoading]);
+
+  // Listen for 401 (expired token) from API - auto logout (clear local state only, skip backend)
+  useEffect(() => {
+    const handler = () => {
+      localStorage.removeItem(STORAGE_KEYS.TOKEN);
+      localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
+      localStorage.removeItem(STORAGE_KEYS.USER);
+      setAuthToken(null);
+      setToken(null);
+      setIsAuthenticated(false);
+      setUser(null);
+      toast.info(
+        t('pages.logout.sessionExpired') || 'Your session has expired. Please log in again.'
+      );
+    };
+    window.addEventListener('auth:unauthorized', handler);
+    return () => window.removeEventListener('auth:unauthorized', handler);
+  }, [t]);
+
+  // Session watcher: periodically check token expiry and auto-logout (no API request needed)
+  useEffect(() => {
+    if (!token || !isAuthenticated) return;
+
+    const checkExpiry = () => {
+      if (token && isTokenExpired(token)) {
+        localStorage.removeItem(STORAGE_KEYS.TOKEN);
+        localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
+        localStorage.removeItem(STORAGE_KEYS.USER);
+        setAuthToken(null);
+        setToken(null);
+        setIsAuthenticated(false);
+        setUser(null);
+        toast.info(
+          t('pages.logout.sessionExpired') || 'Your session has expired. Please log in again.'
+        );
+      }
+    };
+
+    const interval = setInterval(checkExpiry, 30_000); // Check every 30 seconds
+    return () => clearInterval(interval);
+  }, [token, isAuthenticated, t]);
 
   /**
    * Login function - uses React Query mutation

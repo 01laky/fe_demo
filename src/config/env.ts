@@ -41,16 +41,6 @@ function getBoolEnv(key: string, defaultValue: boolean): boolean {
 }
 
 /**
- * Get number environment variable
- */
-function _getNumberEnv(key: string, defaultValue: number): number {
-  const value = import.meta.env[key];
-  if (value === undefined) return defaultValue;
-  const parsed = Number(value);
-  return isNaN(parsed) ? defaultValue : parsed;
-}
-
-/**
  * Environment configuration object
  */
 export const env: EnvConfig = {
@@ -62,8 +52,9 @@ export const env: EnvConfig = {
   oauth2ClientSecret: getEnv('VITE_OAUTH2_CLIENT_SECRET', 'be-demo-secret-very-strong-key'),
 
   // Seq Logging Configuration
-  seqUrl: getEnv('VITE_SEQ_URL', 'http://localhost:5342'),
-  enableSeqLogging: getBoolEnv('VITE_ENABLE_SEQ_LOGGING', true),
+  // In dev, always use Vite proxy (same-origin) to avoid CORS/503
+  seqUrl: import.meta.env.DEV ? '/seq-proxy' : getEnv('VITE_SEQ_URL', 'http://localhost:5342'),
+  enableSeqLogging: getBoolEnv('VITE_ENABLE_SEQ_LOGGING', false),
 
   // Application Configuration
   appName: getEnv('VITE_APP_NAME', 'Be Demo Frontend'),

@@ -28,7 +28,8 @@ body {
 }
 
 #root {
-  min-height: 100vh;
+  height: 100vh;
+  height: 100dvh;
   display: flex;
   flex-direction: column;
 }
@@ -37,17 +38,298 @@ body {
 body {
   margin: 0;
   padding: 0;
+  overflow: hidden;
 }
 
-// App layout: sticky header + scrollable content + sticky footer
+// App layout: fixed viewport, header + scrollable content + footer
 .app-layout {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  height: 100%;
   width: 100%;
+  overflow: hidden;
+}
+
+.app-content-area {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .app-content {
   flex: 1;
   overflow-y: auto;
+}
+
+// ── Settings panel (rolls down from header over main content) ──
+@import 'AnimatedGradient.scss';
+
+.settings-panel {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border: none;
+  z-index: 500;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  pointer-events: none;
+  color: #fff;
+  clip-path: inset(0 0 100% 0);
+  transition: clip-path 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--gradient-bg, rgba(13, 110, 253, 0.45));
+    background-size: var(--gradient-size, auto);
+    animation: var(--gradient-animation, none);
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  &--open {
+    clip-path: inset(0 0 0 0);
+    pointer-events: auto;
+  }
+}
+
+.settings-panel-header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  z-index: 1;
+  flex-shrink: 0;
+}
+
+.settings-tabs {
+  display: flex;
+  gap: 4px;
+}
+
+.settings-tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 20px;
+  border: none;
+  background: none;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  position: relative;
+  transition: color 0.2s;
+
+  &:hover {
+    color: rgba(255, 255, 255, 0.85);
+  }
+
+  &--active {
+    color: #fff;
+
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 8px;
+      right: 8px;
+      height: 2px;
+      background: #fff;
+      border-radius: 1px;
+    }
+  }
+}
+
+.settings-panel-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition:
+    background 0.15s,
+    border-color 0.15s;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.6);
+  }
+}
+
+.settings-panel-body {
+  position: relative;
+  padding: 24px;
+  z-index: 1;
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.settings-panel-body-fill {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.settings-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 300px;
+}
+
+.settings-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.settings-logout-btn {
+  padding: 10px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 6px;
+  background: rgba(220, 53, 69, 0.3);
+  color: #fff;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+
+  &:hover {
+    background: rgba(220, 53, 69, 0.5);
+  }
+}
+
+// ── Faces grid ──
+.faces-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.face-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+  cursor: pointer;
+  text-align: left;
+  color: #fff;
+  padding: 0;
+  transition:
+    border-color 0.2s,
+    transform 0.15s,
+    box-shadow 0.2s;
+
+  &:hover {
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+  }
+
+  &--selected {
+    border-color: #fff;
+    box-shadow: 0 0 0 1px #fff;
+  }
+}
+
+.face-card-preview {
+  height: 80px;
+  width: 100%;
+  background-size: 200% 200%;
+}
+
+.face-card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px;
+}
+
+.face-card-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.face-card-desc {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.65);
+  line-height: 1.3;
+}
+
+.face-card-check {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  color: #000;
+  border-radius: 50%;
+}
+
+@media (max-width: 500px) {
+  .faces-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+// ── Pages navigation (mobile menu) ──
+.pages-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.pages-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.8);
+  text-decoration: none;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  transition:
+    background 0.15s,
+    color 0.15s;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: #fff;
+  }
+
+  &--active {
+    background: rgba(255, 255, 255, 0.18);
+    color: #fff;
+    font-weight: 600;
+  }
 }

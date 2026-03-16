@@ -10,7 +10,9 @@
     "login": "prihlasenie",
     "register": "registracia",
     "homepage": "domov",
-    "chat": "chat"
+    "chat": "chat",
+    "profile": "profil",
+    "users": "uzivatelia"
   },
   "pages": {
     "login": {
@@ -64,8 +66,32 @@
       "ai": "AI"
     },
     "logout": {
+      "title": "Odhlásiť sa",
       "successMessage": "Odhlásenie úspešné",
-      "errorMessage": "Odhlásenie zlyhalo. Skúste to znova."
+      "errorMessage": "Odhlásenie zlyhalo. Skúste to znova.",
+      "sessionExpired": "Platnosť prihlásenia vypršala. Prihláste sa znova."
+    },
+    "profile": {
+      "title": "Profil"
+    },
+    "users": {
+      "title": "Používatelia",
+      "loading": "Načítavam používateľov...",
+      "loadError": "Nepodarilo sa načítať používateľov",
+      "noUsers": "Žiadni používatelia",
+      "gridView": "Mriežka",
+      "listView": "Zoznam"
+    },
+    "userDetail": {
+      "title": "Profil používateľa",
+      "id": "ID",
+      "email": "Email",
+      "firstName": "Meno",
+      "lastName": "Priezvisko",
+      "createdAt": "Vytvorené",
+      "loading": "Načítavam...",
+      "notFound": "Používateľ nenájdený",
+      "error": "Nepodarilo sa načítať používateľa"
     }
   },
   "face": {
@@ -80,5 +106,61 @@
   },
   "footer": {
     "rights": "Všetky práva vyhradené."
+  },
+  "friendRequests": {
+    "incoming": "Žiadosti o priateľstvo",
+    "addFriend": "Pridať priateľa",
+    "searchPlaceholder": "Hľadať podľa mena alebo emailu...",
+    "noSearchResults": "Žiadni používatelia nezodpovedajú hľadaniu",
+    "pageInfo": "Strana {{page}} z {{total}} ({{count}} používateľov)",
+    "prevPage": "Predchádzajúca strana",
+    "nextPage": "Ďalšia strana",
+    "loading": "Načítavam...",
+    "loadError": "Nepodarilo sa načítať",
+    "noRequests": "Žiadne čakajúce žiadosti",
+    "noUsersToAdd": "Žiadni používatelia na pridanie",
+    "accept": "Prijať",
+    "reject": "Odmietnuť",
+    "sendRequest": "Odoslať žiadosť",
+    "accepted": "Žiadosť prijatá",
+    "rejected": "Žiadosť odmietnutá",
+    "sent": "Žiadosť odoslaná",
+    "acceptError": "Nepodarilo sa prijať",
+    "rejectError": "Nepodarilo sa odmietnuť",
+    "sendError": "Nepodarilo sa odoslať"
+  },
+  "messenger": {
+    "title": "Messenger",
+    "conversations": "Konverzácie",
+    "chats": "Chaty",
+    "messageRequests": "Žiadosti o správu",
+    "messageRequest": "Žiadosť o správu",
+    "selectConversation": "Vyberte konverzáciu",
+    "noConversations": "Zatiaľ žiadne konverzácie",
+    "loading": "Načítavam...",
+    "loadError": "Nepodarilo sa načítať",
+    "connected": "Pripojené",
+    "connecting": "Pripájam...",
+    "disconnected": "Odpojené",
+    "placeholder": "Napíšte správu...",
+    "send": "Odoslať",
+    "sendError": "Nepodarilo sa odoslať",
+    "accept": "Prijať",
+    "reject": "Odmietnuť",
+    "requestAccepted": "Žiadosť prijatá",
+    "requestRejected": "Žiadosť odmietnutá",
+    "requestAcceptError": "Nepodarilo sa prijať",
+    "requestRejectError": "Nepodarilo sa odmietnuť",
+    "you": "Vy",
+    "read": "Prečítané"
+  },
+  "notifications": {
+    "title": "Notifikácie",
+    "loading": "Načítavam...",
+    "loadError": "Nepodarilo sa načítať",
+    "noNotifications": "Zatiaľ žiadne notifikácie"
+  },
+  "common": {
+    "back": "Späť"
   }
 }

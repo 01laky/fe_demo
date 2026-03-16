@@ -11,14 +11,13 @@
  *   // All requests will automatically include face path prefix and Authorization header
  */
 
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
-import { OpenAPI } from './core/OpenAPI';
-import type { OpenAPIConfig } from './core/OpenAPI';
+import axios from 'axios';
+import type { AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
 
 /**
  * API client configuration options
  */
-export interface ApiConfig<SecurityDataType = unknown> extends AxiosRequestConfig {
+export interface ApiConfig extends AxiosRequestConfig {
   baseURL?: string;
   withCredentials?: boolean;
 }
@@ -29,9 +28,8 @@ export interface ApiConfig<SecurityDataType = unknown> extends AxiosRequestConfi
  * Automatically prepends face prefix from window.location.pathname to API request URLs.
  * Example: If URL is /acme-corp/dashboard, all API requests will be prefixed with /acme-corp
  */
-export class ApiClient<SecurityDataType = unknown> {
+export class ApiClient {
   public readonly instance: AxiosInstance;
-  private readonly baseURL: string;
 
   /**
    * Create new API client instance
@@ -42,14 +40,14 @@ export class ApiClient<SecurityDataType = unknown> {
    */
   constructor(
     accessToken: string | null,
-    options: ApiConfig<SecurityDataType> = {},
+    options: ApiConfig = {},
     publicIP: string
   ) {
     // Default base URL from publicIP
     const defaultBaseURL = publicIP;
 
     // Merge configuration options
-    const mergedOptions: ApiConfig<SecurityDataType> = {
+    const mergedOptions: ApiConfig = {
       ...options,
       baseURL: options.baseURL || defaultBaseURL,
       withCredentials: true,
@@ -57,7 +55,6 @@ export class ApiClient<SecurityDataType = unknown> {
 
     // Create axios instance with merged configuration
     this.instance = axios.create(mergedOptions);
-    this.baseURL = mergedOptions.baseURL || defaultBaseURL;
 
     // ========================================================================
     // REQUEST INTERCEPTOR
@@ -142,7 +139,7 @@ export class ApiClient<SecurityDataType = unknown> {
    * 
    * @param token - New JWT token (or null to remove)
    */
-  public setAccessToken(token: string | null): void {
+  public setAccessToken(_token: string | null): void {
     // Update token in request interceptor by updating instance defaults
     // This is a simple approach - in production, you might want to store token
     // in a closure or class property and check it in the interceptor

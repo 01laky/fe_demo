@@ -29,11 +29,13 @@ class FrontendLogger {
   }> = [];
   private flushInterval: number = 5000; // Flush every 5 seconds
   private maxBufferSize: number = 100;
+  private lastSeqErrorAt: number = 0;
 
   constructor() {
     // Get Seq URL from environment config
     this.seqUrl = env.seqUrl;
-    this.enabled = env.enableSeqLogging;
+    // Disable Seq in dev to avoid CORS/503 spam; enable only when explicitly needed
+    this.enabled = import.meta.env.PROD ? env.enableSeqLogging : false;
 
     // Start periodic flush
     if (this.enabled) {
@@ -112,7 +114,12 @@ class FrontendLogger {
     } catch (error) {
       // If Seq is not available, put logs back in buffer (except in production)
       if (import.meta.env.DEV) {
-        console.warn('Failed to send logs to Seq:', error);
+        // Suppress repeated warnings (max once per minute) to avoid console spam
+        const now = Date.now();
+        if (!this.lastSeqErrorAt || now - this.lastSeqErrorAt > 60000) {
+          this.lastSeqErrorAt = now;
+          console.warn('Failed to send logs to Seq:', error);
+        }
         // Put logs back at the beginning of buffer
         this.buffer.unshift(...logsToSend);
         // Limit buffer size

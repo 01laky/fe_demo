@@ -1,4 +1,4 @@
-import axios, { type AxiosError, type AxiosRequestConfig } from 'axios';
+import axios, { type AxiosError, type InternalAxiosRequestConfig } from 'axios';
 import { OpenAPI } from './core/OpenAPI';
 import { env } from '../config/env';
 import { supportedLanguages } from '../i18n/config';
@@ -25,9 +25,21 @@ export function configureApiClient() {
   
   // Set up global axios interceptors for face path routing (only once)
   if (!interceptorsSetup && typeof window !== 'undefined') {
+    // Response interceptor: auto-logout on 401 (expired/invalid token)
+    axios.interceptors.response.use(
+      (response) => response,
+      (error: AxiosError) => {
+        const status = error.response?.status;
+        if (status === 401 && localStorage.getItem('auth_token')) {
+          window.dispatchEvent(new CustomEvent('auth:unauthorized'));
+        }
+        return Promise.reject(error);
+      }
+    );
+
     // Request interceptor: prepend face path to API request URLs
     axios.interceptors.request.use(
-      (config: AxiosRequestConfig) => {
+      (config: InternalAxiosRequestConfig) => {
         // Only process requests to API base URL (not external URLs)
         const isApiRequest = config.url && (
           config.url.startsWith('/api/') || 
@@ -77,7 +89,7 @@ export function configureApiClient() {
           }
         }
 
-        return config;
+        return config as InternalAxiosRequestConfig;
       },
       (error: AxiosError) => {
         return Promise.reject(error);

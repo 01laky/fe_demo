@@ -7,10 +7,20 @@
  * Public faces are shown to anonymous users, private faces to authenticated ones.
  */
 
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { useState } from 'react';
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Navigate,
+  Link,
+  useLocation,
+  useNavigate,
+} from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import { AppProvider } from './contexts/AppContext';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { MessengerProvider } from './contexts/MessengerContext';
 import { FaceConfigProvider, useFaceConfig } from './contexts/FaceConfigContext';
 import { LanguageRouter } from './components/LanguageRouter';
 import { Header } from './components/Header';
@@ -22,7 +32,29 @@ import { HomePage } from './pages/HomePage';
 import { HomePageProtected } from './pages/HomePageProtected';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
-import { ChatPage } from './pages/ChatPage';
+import { ProfilePage } from './pages/ProfilePage';
+import { UsersPage } from './pages/UsersPage';
+import { UserDetailPage } from './pages/UserDetailPage';
+import {
+  X,
+  Globe,
+  Check,
+  Home,
+  LogIn,
+  UserPlus,
+  UserRound,
+  MessageCircle,
+  Bell,
+  Users,
+} from 'lucide-react';
+import { useLocalizedLink } from './hooks/useLocalizedLink';
+import { useTranslation } from 'react-i18next';
+import { LanguageSwitcher } from './components/LanguageSwitcher';
+import { getPageIcon } from './utils/pageIcons';
+import { useAnimatedGradientStyle, parseGradientSettings } from './hooks/useAnimatedGradient';
+import { FriendRequestsTab } from './components/FriendRequestsTab';
+import { MessengerTab } from './components/MessengerTab';
+import { NotificationsTab } from './components/NotificationsTab';
 import { logger } from './utils/logger';
 import { supportedLanguages } from './i18n/config';
 import { getAllRouteTranslations } from './utils/routeTranslations';
@@ -62,12 +94,96 @@ function buildFacePagePaths(face: FaceConfig, page: PageConfig): string[] {
 }
 
 /**
+ * Navigation list rendered inside BrowserRouter so router hooks work.
+ */
+function PagesNav({ onNavigate }: { onNavigate: () => void }) {
+  const { isAuthenticated } = useAuth();
+  const { selectedFace, getFaceHomePath } = useFaceConfig();
+  const getLocalizedPath = useLocalizedLink();
+  const location = useLocation();
+  const { t } = useTranslation('common');
+
+  const isActive = (linkPath: string) => {
+    const resolved = getLocalizedPath(linkPath);
+    return location.pathname === resolved || location.pathname.startsWith(resolved + '/');
+  };
+
+  if (!isAuthenticated) {
+    return (
+      <div className="pages-nav">
+        <Link
+          to={getLocalizedPath('/login')}
+          className={`pages-nav-item ${isActive('/login') ? 'pages-nav-item--active' : ''}`}
+          onClick={onNavigate}
+        >
+          <LogIn size={20} />
+          <span>{t('pages.login.title')}</span>
+        </Link>
+        <Link
+          to={getLocalizedPath('/register')}
+          className={`pages-nav-item ${isActive('/register') ? 'pages-nav-item--active' : ''}`}
+          onClick={onNavigate}
+        >
+          <UserPlus size={20} />
+          <span>{t('pages.register.title')}</span>
+        </Link>
+      </div>
+    );
+  }
+
+  return (
+    <div className="pages-nav">
+      <Link
+        to={getLocalizedPath(getFaceHomePath())}
+        className={`pages-nav-item ${isActive(getFaceHomePath()) ? 'pages-nav-item--active' : ''}`}
+        onClick={onNavigate}
+      >
+        <Home size={20} />
+        <span>{t('pages.homepage.title')}</span>
+      </Link>
+      {selectedFace?.pages
+        .filter((p) => p.pageType?.index !== 'home')
+        .map((page) => {
+          const pagePath = page.path.startsWith('/') ? page.path.slice(1) : page.path;
+          const linkPath = `/${selectedFace.index}/${pagePath}`;
+          const Icon = getPageIcon(page.name, page.path, page.pageType?.index);
+          return (
+            <Link
+              key={page.id}
+              to={getLocalizedPath(linkPath)}
+              className={`pages-nav-item ${isActive(linkPath) ? 'pages-nav-item--active' : ''}`}
+              onClick={onNavigate}
+            >
+              <Icon size={20} />
+              <span>{page.name}</span>
+            </Link>
+          );
+        })}
+      <Link
+        to={getLocalizedPath('/users')}
+        className={`pages-nav-item ${isActive('/users') ? 'pages-nav-item--active' : ''}`}
+        onClick={onNavigate}
+      >
+        <Users size={20} />
+        <span>{t('pages.users.title')}</span>
+      </Link>
+    </div>
+  );
+}
+
+/**
  * Inner component that renders routes based on the selected face.
  * Must be inside FaceConfigProvider + AuthProvider.
  */
 function AppRoutes() {
-  const { isAuthenticated } = useAuth();
-  const { selectedFace, isLoading, error } = useFaceConfig();
+  const { t } = useTranslation('common');
+  const { isAuthenticated, token, logout } = useAuth();
+  const navigate = useNavigate();
+  const getLocalizedPath = useLocalizedLink();
+  const { availableFaces, selectedFace, selectFace, isLoading, error } = useFaceConfig();
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [settingsTab, setSettingsTab] = useState<string>('settings');
+  const gradientVars = useAnimatedGradientStyle(selectedFace?.gradientSettings);
 
   logger.info('AppRoutes render', {
     isAuthenticated,
@@ -79,7 +195,6 @@ function AppRoutes() {
   const loginPaths = getRoutePaths('login');
   const registerPaths = getRoutePaths('register');
   const homepagePaths = getRoutePaths('homepage');
-  const chatPaths = getRoutePaths('chat');
 
   if (isLoading) {
     return (
@@ -132,9 +247,152 @@ function AppRoutes() {
   }
 
   return (
-    <BrowserRouter>
-      <div className="app-layout">
-        <Header />
+    <div className={`app-layout ${settingsOpen ? 'app-layout--settings-open' : ''}`}>
+      <Header
+        onSettingsToggle={() => {
+          setSettingsTab('settings');
+          setSettingsOpen((s) => !s);
+        }}
+        onMenuToggle={() => {
+          setSettingsTab('pages');
+          setSettingsOpen((s) => !s);
+        }}
+      />
+      <div className="app-content-area">
+        <div
+          className={`settings-panel ${settingsOpen ? 'settings-panel--open' : ''}`}
+          style={gradientVars}
+        >
+          <div className="settings-panel-header">
+            <nav className="settings-tabs">
+              <button
+                className={`settings-tab ${settingsTab === 'settings' ? 'settings-tab--active' : ''}`}
+                onClick={() => setSettingsTab('settings')}
+                type="button"
+              >
+                Settings
+              </button>
+              {isAuthenticated && (
+                <>
+                  <button
+                    className={`settings-tab ${settingsTab === 'friendRequests' ? 'settings-tab--active' : ''}`}
+                    onClick={() => setSettingsTab('friendRequests')}
+                    type="button"
+                  >
+                    <UserRound size={16} />
+                    <span>Friend Requests</span>
+                  </button>
+                  <button
+                    className={`settings-tab ${settingsTab === 'messenger' ? 'settings-tab--active' : ''}`}
+                    onClick={() => setSettingsTab('messenger')}
+                    type="button"
+                  >
+                    <MessageCircle size={16} />
+                    <span>Messenger</span>
+                  </button>
+                  <button
+                    className={`settings-tab ${settingsTab === 'notifications' ? 'settings-tab--active' : ''}`}
+                    onClick={() => setSettingsTab('notifications')}
+                    type="button"
+                  >
+                    <Bell size={16} />
+                    <span>Notifications</span>
+                  </button>
+                </>
+              )}
+              <button
+                className={`settings-tab ${settingsTab === 'faces' ? 'settings-tab--active' : ''}`}
+                onClick={() => setSettingsTab('faces')}
+                type="button"
+              >
+                Faces
+              </button>
+              <button
+                className={`settings-tab ${settingsTab === 'pages' ? 'settings-tab--active' : ''}`}
+                onClick={() => setSettingsTab('pages')}
+                type="button"
+              >
+                Pages
+              </button>
+            </nav>
+            <button
+              className="settings-panel-close"
+              onClick={() => setSettingsOpen(false)}
+              type="button"
+              aria-label="Close settings"
+            >
+              <X size={20} />
+            </button>
+          </div>
+          <div className="settings-panel-body">
+            {settingsTab === 'settings' && (
+              <div className="settings-section">
+                <label className="settings-label">
+                  <Globe size={18} />
+                  Language
+                </label>
+                <LanguageSwitcher />
+                {isAuthenticated && (
+                  <div className="settings-section" style={{ marginTop: 16 }}>
+                    <button
+                      type="button"
+                      className="settings-logout-btn"
+                      onClick={async () => {
+                        setSettingsOpen(false);
+                        await logout();
+                        navigate(getLocalizedPath('/login'), { replace: true });
+                      }}
+                    >
+                      {t('pages.logout.title', 'Logout')}
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+            {settingsTab === 'faces' && (
+              <div className="faces-grid">
+                {availableFaces.map((face) => {
+                  const isSelected = selectedFace?.id === face.id;
+                  const gradient = parseGradientSettings(face.gradientSettings);
+                  const gradientBg = gradient
+                    ? gradient.type === 'radial'
+                      ? `radial-gradient(circle, ${gradient.colors.join(', ')})`
+                      : `linear-gradient(${gradient.angle}deg, ${gradient.colors.join(', ')})`
+                    : face.color || '#0d6efd';
+                  return (
+                    <button
+                      key={face.id}
+                      className={`face-card ${isSelected ? 'face-card--selected' : ''}`}
+                      onClick={() => selectFace(face.id)}
+                      type="button"
+                    >
+                      <div className="face-card-preview" style={{ background: gradientBg }} />
+                      <div className="face-card-info">
+                        <span className="face-card-title">{face.title}</span>
+                        {face.description && (
+                          <span className="face-card-desc">{face.description}</span>
+                        )}
+                      </div>
+                      {isSelected && (
+                        <div className="face-card-check">
+                          <Check size={16} />
+                        </div>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+            {settingsTab === 'pages' && <PagesNav onNavigate={() => setSettingsOpen(false)} />}
+            {settingsTab === 'friendRequests' && token && (
+              <div className="settings-panel-body-fill">
+                <FriendRequestsTab token={token} />
+              </div>
+            )}
+            {settingsTab === 'messenger' && token && <MessengerTab token={token} />}
+            {settingsTab === 'notifications' && token && <NotificationsTab token={token} />}
+          </div>
+        </div>
         <main className="app-content">
           <Routes>
             <Route path="/" element={<Navigate to={`/${supportedLanguages[0]}`} replace />} />
@@ -210,16 +468,36 @@ function AppRoutes() {
                 />
               ))}
 
-              {/* Chat — protected */}
-              {chatPaths.map((path) => (
+              {/* Profile — protected */}
+              {getRoutePaths('profile').map((path) => (
                 <Route
                   key={path}
                   path={path}
                   element={
                     <ProtectedRoute>
-                      <ChatPage />
+                      <ProfilePage />
                     </ProtectedRoute>
                   }
+                />
+              ))}
+
+              {/* User detail — protected (more specific, must be before users list) */}
+              {getRoutePaths('users').map((path) => (
+                <Route
+                  key={`${path}-detail`}
+                  path={`${path}/:id`}
+                  element={
+                    <ProtectedRoute>{token && <UserDetailPage token={token} />}</ProtectedRoute>
+                  }
+                />
+              ))}
+
+              {/* Users list — protected */}
+              {getRoutePaths('users').map((path) => (
+                <Route
+                  key={path}
+                  path={path}
+                  element={<ProtectedRoute>{token && <UsersPage token={token} />}</ProtectedRoute>}
                 />
               ))}
 
@@ -231,8 +509,17 @@ function AppRoutes() {
             <Route path="*" element={<Navigate to={`/${supportedLanguages[0]}`} replace />} />
           </Routes>
         </main>
-        <Footer />
       </div>
+      <Footer
+        onMessagesClick={
+          isAuthenticated
+            ? () => {
+                setSettingsTab('messenger');
+                setSettingsOpen(true);
+              }
+            : undefined
+        }
+      />
       <ToastContainer
         position="top-center"
         autoClose={5000}
@@ -245,19 +532,28 @@ function AppRoutes() {
         pauseOnHover
         theme="light"
       />
-    </BrowserRouter>
+    </div>
   );
+}
+
+function MessengerProviderWithToken({ children }: { children: React.ReactNode }) {
+  const { token } = useAuth();
+  return <MessengerProvider token={token}>{children}</MessengerProvider>;
 }
 
 function App() {
   return (
-    <AppProvider>
-      <AuthProvider>
-        <FaceConfigProvider>
-          <AppRoutes />
-        </FaceConfigProvider>
-      </AuthProvider>
-    </AppProvider>
+    <BrowserRouter>
+      <AppProvider>
+        <AuthProvider>
+          <MessengerProviderWithToken>
+            <FaceConfigProvider>
+              <AppRoutes />
+            </FaceConfigProvider>
+          </MessengerProviderWithToken>
+        </AuthProvider>
+      </AppProvider>
+    </BrowserRouter>
   );
 }
 

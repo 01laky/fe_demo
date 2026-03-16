@@ -3,6 +3,7 @@ import { AuthService, OAuth2Service, ApiError } from '../../api';
 import type { OAuth2TokenRequest, RegisterModel } from '../../api';
 import { setAuthToken } from '../../api/config';
 import { logger } from '../../utils/logger';
+import { isTokenExpired } from '../../utils/jwtUtils';
 import { env } from '../../config/env';
 
 // Query keys
@@ -123,13 +124,19 @@ export function useAuthToken() {
     queryKey: authKeys.token(),
     queryFn: () => {
       const token = localStorage.getItem('auth_token');
-      if (token) {
-        setAuthToken(token);
-        return { accessToken: token };
+      if (!token || isTokenExpired(token)) {
+        if (token) {
+          localStorage.removeItem('auth_token');
+          localStorage.removeItem('auth_refresh_token');
+          localStorage.removeItem('auth_user');
+          setAuthToken(null);
+        }
+        return null;
       }
-      return null;
+      setAuthToken(token);
+      return { accessToken: token };
     },
-    staleTime: Infinity, // Token doesn't change unless explicitly updated
+    staleTime: 60_000, // Re-check every minute to detect expiry
   });
 }
 
