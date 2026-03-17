@@ -12,14 +12,19 @@ import './FaceRoleSelectPanel.scss';
 
 const STORAGE_PREFIX = 'face_role_chosen_';
 
+/** Storage key for "user has visited this face" (so we don't auto-open panel again). */
+export const FACE_VISITED_KEY = (faceId: number) => `face_visited_${faceId}`;
+
 interface FaceRoleSelectPanelProps {
   /** Current private face */
   face: FaceConfig;
   token: string;
   onRoleSet: () => void;
+  /** When true, rendered inside slide-out panel (lighter styling) */
+  inPanel?: boolean;
 }
 
-export function FaceRoleSelectPanel({ face, token, onRoleSet }: FaceRoleSelectPanelProps) {
+export function FaceRoleSelectPanel({ face, token, onRoleSet, inPanel }: FaceRoleSelectPanelProps) {
   const { t } = useTranslation('common');
   const [roles, setRoles] = useState<FaceRoleOption[]>([]);
   const [loading, setLoading] = useState(true);
@@ -59,6 +64,7 @@ export function FaceRoleSelectPanel({ face, token, onRoleSet }: FaceRoleSelectPa
     try {
       await setMyFaceRole(face.id, selectedRoleId, token);
       localStorage.setItem(`${STORAGE_PREFIX}${face.id}`, '1');
+      localStorage.setItem(FACE_VISITED_KEY(face.id), '1');
       onRoleSet();
     } catch {
       setError(t('faceRoleSelect.saveError'));
@@ -67,9 +73,10 @@ export function FaceRoleSelectPanel({ face, token, onRoleSet }: FaceRoleSelectPa
     }
   };
 
+  const panelClass = `face-role-select-panel${inPanel ? ' face-role-select-panel--in-panel' : ''}`;
   if (loading) {
     return (
-      <div className="face-role-select-panel">
+      <div className={panelClass}>
         <div className="face-role-select-panel__inner">
           <span className="face-role-select-panel__loading">{t('faceRoleSelect.loading')}</span>
         </div>
@@ -78,7 +85,7 @@ export function FaceRoleSelectPanel({ face, token, onRoleSet }: FaceRoleSelectPa
   }
 
   return (
-    <div className="face-role-select-panel">
+    <div className={panelClass}>
       <div className="face-role-select-panel__inner">
         <span className="face-role-select-panel__label">{t('faceRoleSelect.chooseRole')}</span>
         <select
@@ -109,9 +116,16 @@ export function FaceRoleSelectPanel({ face, token, onRoleSet }: FaceRoleSelectPa
   );
 }
 
-// Helper used by App.tsx; separate export to satisfy react-refresh/only-export-components
+/** True if this is a private face (show Face role tab in panel). */
 // eslint-disable-next-line react-refresh/only-export-components
 export function shouldShowFaceRolePanel(face: FaceConfig | null): boolean {
   if (!face || face.isPublic) return false;
-  return !localStorage.getItem(`${STORAGE_PREFIX}${face.id}`);
+  return true;
+}
+
+/** True if user has not yet visited this face (auto-open panel with face role tab). */
+// eslint-disable-next-line react-refresh/only-export-components
+export function isFirstVisitToFace(face: FaceConfig | null): boolean {
+  if (!face || face.isPublic) return false;
+  return !localStorage.getItem(FACE_VISITED_KEY(face.id));
 }

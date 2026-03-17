@@ -163,6 +163,7 @@
   "common": {
     "back": "Back",
     "faceRoleSelect": {
+      "tabTitle": "Face role",
       "chooseRole": "Choose your role in this face",
       "selectPlaceholder": "Select role",
       "confirm": "Confirm",

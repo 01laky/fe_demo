@@ -7,7 +7,7 @@
  * Public faces are shown to anonymous users, private faces to authenticated ones.
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   BrowserRouter,
   Routes,
@@ -16,6 +16,7 @@ import {
   Link,
   useLocation,
   useNavigate,
+  useParams,
 } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import { AppProvider } from './contexts/AppContext';
@@ -46,6 +47,7 @@ import {
   MessageCircle,
   Bell,
   Users,
+  Shield,
 } from 'lucide-react';
 import { useLocalizedLink } from './hooks/useLocalizedLink';
 import { useTranslation } from 'react-i18next';
@@ -55,7 +57,12 @@ import { useAnimatedGradientStyle, parseGradientSettings } from './hooks/useAnim
 import { FriendRequestsTab } from './components/FriendRequestsTab';
 import { MessengerTab } from './components/MessengerTab';
 import { NotificationsTab } from './components/NotificationsTab';
-import { FaceRoleSelectPanel, shouldShowFaceRolePanel } from './components/FaceRoleSelectPanel';
+import {
+  FaceRoleSelectPanel,
+  shouldShowFaceRolePanel,
+  isFirstVisitToFace,
+  FACE_VISITED_KEY,
+} from './components/FaceRoleSelectPanel';
 import { logger } from './utils/logger';
 import { supportedLanguages } from './i18n/config';
 import { getAllRouteTranslations } from './utils/routeTranslations';
@@ -92,6 +99,28 @@ function buildFacePagePaths(face: FaceConfig, page: PageConfig): string[] {
   }
 
   return paths;
+}
+
+/** Redirects guest from /:lang to /:lang/:face/home so URL always has face prefix. */
+function GuestRedirectToFaceHome() {
+  const { lang } = useParams<{ lang: string }>();
+  const { selectedFace, getFaceHomePath } = useFaceConfig();
+  if (!selectedFace) return <HomePage />;
+  return <Navigate to={`/${lang}${getFaceHomePath()}`} replace />;
+}
+
+/** Redirects guest from /:lang/login (or translated) to /:lang/:face/login so URL has face prefix. */
+function GuestRedirectToFacePath({
+  subPath,
+  fallback,
+}: {
+  subPath: string;
+  fallback: React.ReactNode;
+}) {
+  const { lang } = useParams<{ lang: string }>();
+  const { selectedFace } = useFaceConfig();
+  if (!selectedFace) return <>{fallback}</>;
+  return <Navigate to={`/${lang}/${selectedFace.index}/${subPath}`} replace />;
 }
 
 /**
@@ -186,6 +215,24 @@ function AppRoutes() {
   const [settingsTab, setSettingsTab] = useState<string>('settings');
   const gradientVars = useAnimatedGradientStyle(selectedFace?.gradientSettings);
 
+  // First visit to a private face: open slide-out panel with Face role tab by default (deferred to avoid setState-in-effect lint)
+  useEffect(() => {
+    if (!selectedFace || selectedFace.isPublic) return;
+    if (!isFirstVisitToFace(selectedFace)) return;
+    const id = window.setTimeout(() => {
+      setSettingsOpen(true);
+      setSettingsTab('faceRole');
+    }, 0);
+    return () => clearTimeout(id);
+  }, [selectedFace?.id, selectedFace]);
+
+  const handleClosePanel = () => {
+    if (selectedFace && !selectedFace.isPublic) {
+      localStorage.setItem(FACE_VISITED_KEY(selectedFace.id), '1');
+    }
+    setSettingsOpen(false);
+  };
+
   logger.info('AppRoutes render', {
     isAuthenticated,
     selectedFaceId: selectedFace?.id,
@@ -259,9 +306,6 @@ function AppRoutes() {
           setSettingsOpen((s) => !s);
         }}
       />
-      {isAuthenticated && token && selectedFace && shouldShowFaceRolePanel(selectedFace) && (
-        <FaceRoleSelectPanel face={selectedFace} token={token} onRoleSet={() => reload()} />
-      )}
       <div className="app-content-area">
         <div
           className={`settings-panel ${settingsOpen ? 'settings-panel--open' : ''}`}
@@ -276,6 +320,16 @@ function AppRoutes() {
               >
                 Settings
               </button>
+              {isAuthenticated && selectedFace && shouldShowFaceRolePanel(selectedFace) && (
+                <button
+                  className={`settings-tab ${settingsTab === 'faceRole' ? 'settings-tab--active' : ''}`}
+                  onClick={() => setSettingsTab('faceRole')}
+                  type="button"
+                >
+                  <Shield size={16} />
+                  <span>{t('faceRoleSelect.tabTitle', 'Face role')}</span>
+                </button>
+              )}
               {isAuthenticated && (
                 <>
                   <button
@@ -321,7 +375,7 @@ function AppRoutes() {
             </nav>
             <button
               className="settings-panel-close"
-              onClick={() => setSettingsOpen(false)}
+              onClick={handleClosePanel}
               type="button"
               aria-label="Close settings"
             >
@@ -329,6 +383,16 @@ function AppRoutes() {
             </button>
           </div>
           <div className="settings-panel-body">
+            {settingsTab === 'faceRole' && token && selectedFace && (
+              <div className="settings-panel-body-fill settings-section">
+                <FaceRoleSelectPanel
+                  face={selectedFace}
+                  token={token}
+                  onRoleSet={() => reload()}
+                  inPanel
+                />
+              </div>
+            )}
             {settingsTab === 'settings' && (
               <div className="settings-section">
                 <label className="settings-label">
@@ -402,21 +466,43 @@ function AppRoutes() {
             <Route path="/" element={<Navigate to={`/${supportedLanguages[0]}`} replace />} />
 
             <Route path="/:lang" element={<LanguageRouter />}>
-              {/* Index — guest landing or redirect to homepage */}
+              {/* Index — guest redirects to /:lang/:face/home so URL has face prefix */}
               <Route
                 index
                 element={
                   <GuestRoute>
-                    <HomePage />
+                    <GuestRedirectToFaceHome />
                   </GuestRoute>
                 }
               />
 
               {/* === Face page routes (dynamic, from selected face) === */}
-              {faceRoutes.map((fr) =>
-                fr.isPublic ? (
-                  // Public face routes — visible without auth
-                  <Route key={fr.key} path={fr.path} element={<FacePageView page={fr.page} />} />
+              {faceRoutes.map((fr) => {
+                const pathNorm = fr.page.path.replace(/^\//, '');
+                const isPublicLogin = fr.isPublic && pathNorm === 'login';
+                const isPublicRegister = fr.isPublic && pathNorm === 'register';
+                const isPublicHome =
+                  fr.isPublic && pathNorm === 'home' && fr.page.pageType?.index === 'home';
+                const publicElement = isPublicLogin ? (
+                  <GuestRoute>
+                    <LoginPage />
+                  </GuestRoute>
+                ) : isPublicRegister ? (
+                  <GuestRoute>
+                    <RegisterPage />
+                  </GuestRoute>
+                ) : isPublicHome ? (
+                  <GuestRoute>
+                    <HomePage />
+                  </GuestRoute>
+                ) : null;
+                return fr.isPublic ? (
+                  // Public face routes — use real Login/Register/Home components when path matches
+                  <Route
+                    key={fr.key}
+                    path={fr.path}
+                    element={publicElement ?? <FacePageView page={fr.page} />}
+                  />
                 ) : (
                   // Private face routes — require authentication
                   <Route
@@ -428,32 +514,32 @@ function AppRoutes() {
                       </ProtectedRoute>
                     }
                   />
-                )
-              )}
+                );
+              })}
 
               {/* === Static routes === */}
 
-              {/* Login — guest only */}
+              {/* Login — guest redirects to /:lang/:face/login so URL has face prefix */}
               {loginPaths.map((path) => (
                 <Route
                   key={path}
                   path={path}
                   element={
                     <GuestRoute>
-                      <LoginPage />
+                      <GuestRedirectToFacePath subPath={path} fallback={<LoginPage />} />
                     </GuestRoute>
                   }
                 />
               ))}
 
-              {/* Register — guest only */}
+              {/* Register — guest redirects to /:lang/:face/register so URL has face prefix */}
               {registerPaths.map((path) => (
                 <Route
                   key={path}
                   path={path}
                   element={
                     <GuestRoute>
-                      <RegisterPage />
+                      <GuestRedirectToFacePath subPath={path} fallback={<RegisterPage />} />
                     </GuestRoute>
                   }
                 />

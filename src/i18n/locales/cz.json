@@ -163,6 +163,7 @@
   "common": {
     "back": "Zpět",
     "faceRoleSelect": {
+      "tabTitle": "Role ve face",
       "chooseRole": "Vyberte svou roli v tomto face",
       "selectPlaceholder": "Vyberte roli",
       "confirm": "Potvrdit",
