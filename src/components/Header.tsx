@@ -2,6 +2,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import { useFaceConfig } from '../contexts/FaceConfigContext';
+import { useProfile } from '../hooks/api/useProfileApi';
 import { useAnimatedGradientStyle } from '../hooks/useAnimatedGradient';
 import { MainLogo } from './MainLogo';
 import { useLocalizedLink } from '../hooks/useLocalizedLink';
@@ -23,6 +24,8 @@ import './Header.scss';
 interface HeaderProps {
   onSettingsToggle?: () => void;
   onMenuToggle?: () => void;
+  /** When provided, clicking the profile area opens the slide-out panel with Edit profile tab selected */
+  onProfileClick?: () => void;
 }
 
 /** Resolve current face page name from pathname and face config */
@@ -41,13 +44,19 @@ function getCurrentPageName(pathname: string, selectedFace: FaceConfig | null): 
   return page?.name ?? null;
 }
 
-export function Header({ onSettingsToggle, onMenuToggle }: HeaderProps) {
+export function Header({ onSettingsToggle, onMenuToggle, onProfileClick }: HeaderProps) {
   const { t } = useTranslation('common');
   const getLocalizedPath = useLocalizedLink();
   const location = useLocation();
   const { isAuthenticated, user } = useAuth();
   const { selectedFace, getFaceHomePath } = useFaceConfig();
+  const { profile, resolvedAvatarUrl } = useProfile();
   const gradientVars = useAnimatedGradientStyle(selectedFace?.gradientSettings);
+
+  const displayName =
+    profile?.firstName?.trim() || profile?.lastName?.trim()
+      ? [profile?.firstName?.trim(), profile?.lastName?.trim()].filter(Boolean).join(' ')
+      : (user?.email?.split('@')[0] ?? 'User');
 
   const isActive = (linkPath: string) => {
     const resolved = getLocalizedPath(linkPath);
@@ -167,19 +176,44 @@ export function Header({ onSettingsToggle, onMenuToggle }: HeaderProps) {
         {/* Right: profile panel (rounded) */}
         <div className="header-panel header-panel--profile">
           {isAuthenticated && user ? (
-            <Link
-              to={getLocalizedPath('/profile')}
-              className={`header-profile ${isActive('/profile') ? 'header-profile--active' : ''}`}
-              title={t('pages.profile.title')}
-            >
-              <div className="header-profile-info">
-                <span className="header-profile-name">{user.email?.split('@')[0] ?? 'User'}</span>
-                <span className="header-profile-status">Online</span>
-              </div>
-              <div className="header-profile-avatar">
-                <UserCircle size={40} strokeWidth={1.5} />
-              </div>
-            </Link>
+            onProfileClick ? (
+              <button
+                type="button"
+                className="header-profile header-profile-btn"
+                title={t('pages.profile.title')}
+                onClick={onProfileClick}
+              >
+                <div className="header-profile-info">
+                  <span className="header-profile-name">{displayName}</span>
+                  <span className="header-profile-status">Online</span>
+                </div>
+                <div className="header-profile-avatar">
+                  {resolvedAvatarUrl ? (
+                    <img src={resolvedAvatarUrl} alt="" className="header-profile-avatar-img" />
+                  ) : (
+                    <UserCircle size={40} strokeWidth={1.5} />
+                  )}
+                </div>
+              </button>
+            ) : (
+              <Link
+                to={getLocalizedPath('/profile')}
+                className={`header-profile ${isActive('/profile') ? 'header-profile--active' : ''}`}
+                title={t('pages.profile.title')}
+              >
+                <div className="header-profile-info">
+                  <span className="header-profile-name">{displayName}</span>
+                  <span className="header-profile-status">Online</span>
+                </div>
+                <div className="header-profile-avatar">
+                  {resolvedAvatarUrl ? (
+                    <img src={resolvedAvatarUrl} alt="" className="header-profile-avatar-img" />
+                  ) : (
+                    <UserCircle size={40} strokeWidth={1.5} />
+                  )}
+                </div>
+              </Link>
+            )
           ) : (
             <div className="header-profile header-profile--guest">
               <div className="header-profile-info">

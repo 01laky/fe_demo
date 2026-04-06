@@ -21,6 +21,7 @@ import {
 import { ToastContainer } from 'react-toastify';
 import { AppProvider } from './contexts/AppContext';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { ApiContextProvider } from './contexts/ApiContext';
 import { MessengerProvider } from './contexts/MessengerContext';
 import { FaceConfigProvider, useFaceConfig } from './contexts/FaceConfigContext';
 import { LanguageRouter } from './components/LanguageRouter';
@@ -48,6 +49,8 @@ import {
   Bell,
   Users,
   Shield,
+  ShieldBan,
+  UserCheck,
 } from 'lucide-react';
 import { useLocalizedLink } from './hooks/useLocalizedLink';
 import { useTranslation } from 'react-i18next';
@@ -57,12 +60,15 @@ import { useAnimatedGradientStyle, parseGradientSettings } from './hooks/useAnim
 import { FriendRequestsTab } from './components/FriendRequestsTab';
 import { MessengerTab } from './components/MessengerTab';
 import { NotificationsTab } from './components/NotificationsTab';
+import { BlockListTab } from './components/BlockListTab';
+import { FollowTab } from './components/FollowTab';
 import {
   FaceRoleSelectPanel,
   shouldShowFaceRolePanel,
   isFirstVisitToFace,
   FACE_VISITED_KEY,
 } from './components/FaceRoleSelectPanel';
+import { EditProfileTab } from './components/EditProfileTab';
 import { logger } from './utils/logger';
 import { supportedLanguages } from './i18n/config';
 import { getAllRouteTranslations } from './utils/routeTranslations';
@@ -305,6 +311,10 @@ function AppRoutes() {
           setSettingsTab('pages');
           setSettingsOpen((s) => !s);
         }}
+        onProfileClick={() => {
+          setSettingsTab('profile');
+          setSettingsOpen(true);
+        }}
       />
       <div className="app-content-area">
         <div
@@ -320,6 +330,16 @@ function AppRoutes() {
               >
                 Settings
               </button>
+              {isAuthenticated && (
+                <button
+                  className={`settings-tab ${settingsTab === 'profile' ? 'settings-tab--active' : ''}`}
+                  onClick={() => setSettingsTab('profile')}
+                  type="button"
+                >
+                  <UserRound size={16} />
+                  <span>{t('editProfile.tabTitle', 'Edit profile')}</span>
+                </button>
+              )}
               {isAuthenticated && selectedFace && shouldShowFaceRolePanel(selectedFace) && (
                 <button
                   className={`settings-tab ${settingsTab === 'faceRole' ? 'settings-tab--active' : ''}`}
@@ -356,6 +376,22 @@ function AppRoutes() {
                     <Bell size={16} />
                     <span>Notifications</span>
                   </button>
+                  <button
+                    className={`settings-tab ${settingsTab === 'blockList' ? 'settings-tab--active' : ''}`}
+                    onClick={() => setSettingsTab('blockList')}
+                    type="button"
+                  >
+                    <ShieldBan size={16} />
+                    <span>{t('userBlock.blockList', 'Block List')}</span>
+                  </button>
+                  <button
+                    className={`settings-tab ${settingsTab === 'follows' ? 'settings-tab--active' : ''}`}
+                    onClick={() => setSettingsTab('follows')}
+                    type="button"
+                  >
+                    <UserCheck size={16} />
+                    <span>{t('userFollow.followList', 'Follows')}</span>
+                  </button>
                 </>
               )}
               <button
@@ -383,6 +419,7 @@ function AppRoutes() {
             </button>
           </div>
           <div className="settings-panel-body">
+            {settingsTab === 'profile' && <EditProfileTab />}
             {settingsTab === 'faceRole' && token && selectedFace && (
               <div className="settings-panel-body-fill settings-section">
                 <FaceRoleSelectPanel
@@ -459,6 +496,16 @@ function AppRoutes() {
             )}
             {settingsTab === 'messenger' && token && <MessengerTab token={token} />}
             {settingsTab === 'notifications' && token && <NotificationsTab token={token} />}
+            {settingsTab === 'blockList' && token && (
+              <div className="settings-panel-body-fill">
+                <BlockListTab token={token} />
+              </div>
+            )}
+            {settingsTab === 'follows' && token && (
+              <div className="settings-panel-body-fill">
+                <FollowTab token={token} />
+              </div>
+            )}
           </div>
         </div>
         <main className="app-content">
@@ -631,16 +678,23 @@ function MessengerProviderWithToken({ children }: { children: React.ReactNode })
   return <MessengerProvider token={token}>{children}</MessengerProvider>;
 }
 
+function ApiContextProviderWithToken({ children }: { children: React.ReactNode }) {
+  const { token } = useAuth();
+  return <ApiContextProvider accessToken={token}>{children}</ApiContextProvider>;
+}
+
 function App() {
   return (
     <BrowserRouter>
       <AppProvider>
         <AuthProvider>
-          <MessengerProviderWithToken>
-            <FaceConfigProvider>
-              <AppRoutes />
-            </FaceConfigProvider>
-          </MessengerProviderWithToken>
+          <ApiContextProviderWithToken>
+            <MessengerProviderWithToken>
+              <FaceConfigProvider>
+                <AppRoutes />
+              </FaceConfigProvider>
+            </MessengerProviderWithToken>
+          </ApiContextProviderWithToken>
         </AuthProvider>
       </AppProvider>
     </BrowserRouter>

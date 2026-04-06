@@ -160,6 +160,33 @@
     "loadError": "Nepodařilo se načíst",
     "noNotifications": "Zatím žádná oznámení"
   },
+  "userBlock": {
+    "block": "Zablokovat uživatele",
+    "unblock": "Odblokovat uživatele",
+    "blocked": "Uživatel zablokován",
+    "unblocked": "Uživatel odblokován",
+    "blockError": "Nepodařilo se zablokovat",
+    "unblockError": "Nepodařilo se odblokovat",
+    "blockList": "Seznam blokovaných",
+    "loading": "Načítání...",
+    "loadError": "Nepodařilo se načíst blokované",
+    "noBlockedUsers": "Žádní blokovaní uživatelé"
+  },
+  "userFollow": {
+    "follow": "Sledovat uživatele",
+    "unfollow": "Zrušit sledování",
+    "followed": "Uživatel sledován",
+    "unfollowed": "Sledování zrušeno",
+    "followError": "Nepodařilo se sledovat",
+    "unfollowError": "Nepodařilo se zrušit sledování",
+    "followList": "Sledovaní",
+    "following": "Sleduji",
+    "followers": "Sledující",
+    "noFollowing": "Nikoho nesledujete",
+    "noFollowers": "Zatím žádní sledující",
+    "loading": "Načítání...",
+    "loadError": "Nepodařilo se načíst sledované"
+  },
   "common": {
     "back": "Zpět",
     "faceRoleSelect": {
@@ -171,6 +198,26 @@
       "saving": "Ukládám...",
       "loadError": "Nepodařilo se načíst role",
       "saveError": "Nepodařilo se uložit roli"
+    },
+    "editProfile": {
+      "tabTitle": "Upravit profil",
+      "loading": "Načítání profilu...",
+      "firstName": "Jméno",
+      "lastName": "Příjmení",
+      "firstNamePlaceholder": "Jméno",
+      "lastNamePlaceholder": "Příjmení",
+      "save": "Uložit jméno",
+      "saved": "Profil uložen",
+      "saveError": "Nepodařilo se uložit profil",
+      "globalAvatar": "Globální profilový obrázek",
+      "globalAvatarDesc": "Zobrazuje se ve všech face, pokud nemáte nastavené lokální.",
+      "faceAvatar": "Profilový obrázek pro tento face",
+      "faceAvatarDesc": "Používá se jen v tomto face. Pokud je nastaven, nahradí globální.",
+      "upload": "Nahrát",
+      "globalAvatarUploaded": "Globální obrázek aktualizován",
+      "faceAvatarUploaded": "Obrázek pro face aktualizován",
+      "uploadError": "Nepodařilo se nahrát obrázek",
+      "invalidImage": "Vyberte prosím obrázek"
     }
   }
 }

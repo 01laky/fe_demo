@@ -160,6 +160,33 @@
     "loadError": "Nepodarilo sa načítať",
     "noNotifications": "Zatiaľ žiadne notifikácie"
   },
+  "userBlock": {
+    "block": "Zablokovať používateľa",
+    "unblock": "Odblokovať používateľa",
+    "blocked": "Používateľ zablokovaný",
+    "unblocked": "Používateľ odblokovaný",
+    "blockError": "Nepodarilo sa zablokovať",
+    "unblockError": "Nepodarilo sa odblokovať",
+    "blockList": "Zoznam blokovaných",
+    "loading": "Načítavam...",
+    "loadError": "Nepodarilo sa načítať blokovaných",
+    "noBlockedUsers": "Žiadni blokovaní používatelia"
+  },
+  "userFollow": {
+    "follow": "Sledovať používateľa",
+    "unfollow": "Zrušiť sledovanie",
+    "followed": "Používateľ sledovaný",
+    "unfollowed": "Sledovanie zrušené",
+    "followError": "Nepodarilo sa sledovať",
+    "unfollowError": "Nepodarilo sa zrušiť sledovanie",
+    "followList": "Sledovaní",
+    "following": "Sledujem",
+    "followers": "Sledujúci",
+    "noFollowing": "Nesledujete nikoho",
+    "noFollowers": "Zatiaľ žiadni sledujúci",
+    "loading": "Načítavam...",
+    "loadError": "Nepodarilo sa načítať sledovaných"
+  },
   "common": {
     "back": "Späť",
     "faceRoleSelect": {
@@ -171,6 +198,26 @@
       "saving": "Ukladám...",
       "loadError": "Nepodarilo sa načítať role",
       "saveError": "Nepodarilo sa uložiť rolu"
+    },
+    "editProfile": {
+      "tabTitle": "Upraviť profil",
+      "loading": "Načítavam profil...",
+      "firstName": "Meno",
+      "lastName": "Priezvisko",
+      "firstNamePlaceholder": "Meno",
+      "lastNamePlaceholder": "Priezvisko",
+      "save": "Uložiť meno",
+      "saved": "Profil uložený",
+      "saveError": "Nepodarilo sa uložiť profil",
+      "globalAvatar": "Globálna profilová fotka",
+      "globalAvatarDesc": "Zobrazuje sa vo všetkých face, ak nemáte nastavenú lokálnu.",
+      "faceAvatar": "Profilová fotka pre tento face",
+      "faceAvatarDesc": "Používa sa len v tomto face. Ak je nastavená, nahradí globálnu.",
+      "upload": "Nahrať",
+      "globalAvatarUploaded": "Globálna fotka aktualizovaná",
+      "faceAvatarUploaded": "Fotka pre face aktualizovaná",
+      "uploadError": "Nepodarilo sa nahrať obrázok",
+      "invalidImage": "Vyberte prosím obrázok"
     }
   }
 }

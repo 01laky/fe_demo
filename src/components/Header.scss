@@ -265,6 +265,21 @@
   background: rgba(255, 255, 255, 0.08);
   color: rgba(255, 255, 255, 0.9);
   flex-shrink: 0;
+  overflow: hidden;
+
+  &-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.header-profile-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font: inherit;
 }
 
 // ── Burger (hidden on desktop) ──

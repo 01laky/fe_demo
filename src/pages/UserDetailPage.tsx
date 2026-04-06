@@ -1,9 +1,20 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, UserCircle, Loader2 } from 'lucide-react';
+import {
+  ArrowLeft,
+  UserCircle,
+  Loader2,
+  ShieldBan,
+  ShieldCheck,
+  UserPlus,
+  UserCheck,
+} from 'lucide-react';
+import { toast } from 'react-toastify';
 import { useLocalizedLink } from '../hooks/useLocalizedLink';
 import { getUser, type UserListItem } from '../api/services/UsersListService';
+import { getBlockStatus, blockUser, unblockUser } from '../api/services/UserBlocksService';
+import { getFollowStatus, followUser, unfollowUser } from '../api/services/UserFollowsService';
 import './UserDetailPage.scss';
 
 export function UserDetailPage({ token }: { token: string }) {
@@ -14,6 +25,10 @@ export function UserDetailPage({ token }: { token: string }) {
   const [user, setUser] = useState<UserListItem | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [isBlocked, setIsBlocked] = useState(false);
+  const [blockLoading, setBlockLoading] = useState(false);
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [followLoading, setFollowLoading] = useState(false);
 
   useEffect(() => {
     if (!id) {
@@ -37,10 +52,60 @@ export function UserDetailPage({ token }: { token: string }) {
       .finally(() => {
         if (!cancelled) setLoading(false);
       });
+    getBlockStatus(id, token)
+      .then((data) => {
+        if (!cancelled) setIsBlocked(data.isBlocked);
+      })
+      .catch(() => {});
+    getFollowStatus(id, token)
+      .then((data) => {
+        if (!cancelled) setIsFollowing(data.isFollowing);
+      })
+      .catch(() => {});
     return () => {
       cancelled = true;
     };
   }, [id, token]);
+
+  const handleToggleBlock = async () => {
+    if (!id) return;
+    try {
+      setBlockLoading(true);
+      if (isBlocked) {
+        await unblockUser(id, token);
+        setIsBlocked(false);
+        toast.success(t('userBlock.unblocked'));
+      } else {
+        await blockUser(id, token);
+        setIsBlocked(true);
+        toast.success(t('userBlock.blocked'));
+      }
+    } catch {
+      toast.error(isBlocked ? t('userBlock.unblockError') : t('userBlock.blockError'));
+    } finally {
+      setBlockLoading(false);
+    }
+  };
+
+  const handleToggleFollow = async () => {
+    if (!id) return;
+    try {
+      setFollowLoading(true);
+      if (isFollowing) {
+        await unfollowUser(id, token);
+        setIsFollowing(false);
+        toast.success(t('userFollow.unfollowed'));
+      } else {
+        await followUser(id, token);
+        setIsFollowing(true);
+        toast.success(t('userFollow.followed'));
+      }
+    } catch {
+      toast.error(isFollowing ? t('userFollow.unfollowError') : t('userFollow.followError'));
+    } finally {
+      setFollowLoading(false);
+    }
+  };
 
   const handleBack = () => navigate(getLocalizedPath('/users'));
 
@@ -111,6 +176,36 @@ export function UserDetailPage({ token }: { token: string }) {
             </div>
           )}
         </dl>
+        <button
+          type="button"
+          className={`user-detail-block-btn ${isBlocked ? 'user-detail-block-btn--blocked' : ''}`}
+          onClick={handleToggleBlock}
+          disabled={blockLoading}
+        >
+          {blockLoading ? (
+            <Loader2 size={18} className="spin" />
+          ) : isBlocked ? (
+            <ShieldCheck size={18} />
+          ) : (
+            <ShieldBan size={18} />
+          )}
+          {isBlocked ? t('userBlock.unblock') : t('userBlock.block')}
+        </button>
+        <button
+          type="button"
+          className={`user-detail-follow-btn ${isFollowing ? 'user-detail-follow-btn--following' : ''}`}
+          onClick={handleToggleFollow}
+          disabled={followLoading}
+        >
+          {followLoading ? (
+            <Loader2 size={18} className="spin" />
+          ) : isFollowing ? (
+            <UserCheck size={18} />
+          ) : (
+            <UserPlus size={18} />
+          )}
+          {isFollowing ? t('userFollow.unfollow') : t('userFollow.follow')}
+        </button>
       </div>
     </div>
   );

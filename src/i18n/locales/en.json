@@ -160,6 +160,33 @@
     "loadError": "Failed to load",
     "noNotifications": "No notifications yet"
   },
+  "userBlock": {
+    "block": "Block user",
+    "unblock": "Unblock user",
+    "blocked": "User blocked",
+    "unblocked": "User unblocked",
+    "blockError": "Failed to block user",
+    "unblockError": "Failed to unblock user",
+    "blockList": "Block List",
+    "loading": "Loading...",
+    "loadError": "Failed to load blocked users",
+    "noBlockedUsers": "No blocked users"
+  },
+  "userFollow": {
+    "follow": "Follow user",
+    "unfollow": "Unfollow user",
+    "followed": "User followed",
+    "unfollowed": "User unfollowed",
+    "followError": "Failed to follow user",
+    "unfollowError": "Failed to unfollow user",
+    "followList": "Follows",
+    "following": "Following",
+    "followers": "Followers",
+    "noFollowing": "Not following anyone",
+    "noFollowers": "No followers yet",
+    "loading": "Loading...",
+    "loadError": "Failed to load follows"
+  },
   "common": {
     "back": "Back",
     "faceRoleSelect": {
@@ -171,6 +198,26 @@
       "saving": "Saving...",
       "loadError": "Failed to load roles",
       "saveError": "Failed to save role"
+    },
+    "editProfile": {
+      "tabTitle": "Edit profile",
+      "loading": "Loading profile...",
+      "firstName": "First name",
+      "lastName": "Last name",
+      "firstNamePlaceholder": "First name",
+      "lastNamePlaceholder": "Last name",
+      "save": "Save name",
+      "saved": "Profile saved",
+      "saveError": "Failed to save profile",
+      "globalAvatar": "Global avatar",
+      "globalAvatarDesc": "Shown in every face when no face-specific avatar is set.",
+      "faceAvatar": "Avatar for this face",
+      "faceAvatarDesc": "Used only in this face. If set, it overrides the global avatar here.",
+      "upload": "Upload",
+      "globalAvatarUploaded": "Global avatar updated",
+      "faceAvatarUploaded": "Face avatar updated",
+      "uploadError": "Failed to upload avatar",
+      "invalidImage": "Please choose an image file"
     }
   }
 }
