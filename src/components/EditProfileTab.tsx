@@ -1,16 +1,17 @@
 import { useState, useRef, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { UserCircle, Upload, Loader2 } from 'lucide-react';
+import { UserCircle, Upload, Loader2, LogOut } from 'lucide-react';
 import { useProfile } from '../hooks/api/useProfileApi';
 import { useAuth } from '../contexts/AuthContext';
 import { useFaceConfig } from '../contexts/FaceConfigContext';
 import { toast } from 'react-toastify';
+import { exitFace } from '../api/services/faceProfilesApi';
 import './EditProfileTab.scss';
 
 export function EditProfileTab() {
   const { t } = useTranslation('common');
-  const { user } = useAuth();
-  const { selectedFace } = useFaceConfig();
+  const { user, token } = useAuth();
+  const { selectedFace, availableFaces, selectFace, reload } = useFaceConfig();
   const {
     profile,
     isLoading,
@@ -33,6 +34,15 @@ export function EditProfileTab() {
   const [lastName, setLastName] = useState(initialNames.last);
   const globalInputRef = useRef<HTMLInputElement>(null);
   const faceInputRef = useRef<HTMLInputElement>(null);
+  const [exitFaceConfirming, setExitFaceConfirming] = useState(false);
+  const [exitFaceLoading, setExitFaceLoading] = useState(false);
+
+  const canExitFace = Boolean(
+    selectedFace &&
+    token &&
+    selectedFace.myFaceRoleName &&
+    selectedFace.myFaceRoleName !== 'FACE_HOST'
+  );
 
   // Sync state when source data changes (profile loaded or user changes)
   if (profile && firstName === '' && (profile.firstName || profile.lastName)) {
@@ -104,6 +114,53 @@ export function EditProfileTab() {
 
   const globalUrl = profile?.globalAvatarUrl ?? null;
   const faceUrl = profile?.faceAvatarUrl ?? null;
+
+  const handleExitFace = async () => {
+    if (!selectedFace || !token) return;
+    setExitFaceLoading(true);
+    try {
+      await exitFace(selectedFace.id, token);
+      toast.dismiss();
+      toast.success(t('exitFace.success'));
+      setExitFaceConfirming(false);
+      const basic = availableFaces.find((f) => f.index.toLowerCase() === 'basic');
+      if (basic) selectFace(basic.id);
+      await reload();
+    } catch {
+      toast.error(t('exitFace.error'));
+    } finally {
+      setExitFaceLoading(false);
+    }
+  };
+
+  if (exitFaceConfirming && canExitFace) {
+    return (
+      <div className="edit-profile-tab">
+        <div className="edit-profile-tab__exit-confirm">
+          <h4 className="edit-profile-tab__section-title">{t('exitFace.confirmTitle')}</h4>
+          <p className="edit-profile-tab__section-desc">{t('exitFace.confirmBody')}</p>
+          <div className="edit-profile-tab__exit-actions">
+            <button
+              type="button"
+              className="edit-profile-tab__exit-btn edit-profile-tab__exit-btn--danger"
+              disabled={exitFaceLoading}
+              onClick={() => void handleExitFace()}
+            >
+              {exitFaceLoading ? <Loader2 size={18} className="spin" /> : t('exitFace.yes')}
+            </button>
+            <button
+              type="button"
+              className="edit-profile-tab__exit-btn"
+              disabled={exitFaceLoading}
+              onClick={() => setExitFaceConfirming(false)}
+            >
+              {t('exitFace.no')}
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="edit-profile-tab">
@@ -218,6 +275,21 @@ export function EditProfileTab() {
               </button>
             </div>
           </div>
+        </section>
+      )}
+
+      {canExitFace && (
+        <section className="edit-profile-tab__section edit-profile-tab__section--exit">
+          <h4 className="edit-profile-tab__section-title">{t('exitFace.button')}</h4>
+          <p className="edit-profile-tab__section-desc">{t('exitFace.hint')}</p>
+          <button
+            type="button"
+            className="edit-profile-tab__exit-face-btn"
+            onClick={() => setExitFaceConfirming(true)}
+          >
+            <LogOut size={18} />
+            <span>{t('exitFace.button')}</span>
+          </button>
         </section>
       )}
     </div>

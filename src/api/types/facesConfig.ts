@@ -35,9 +35,16 @@ export interface FaceConfig {
   color?: string | null;
   gradientSettings?: string | null;
   isPublic: boolean;
+  /** Profile directory visibility (API enum name) */
+  visibility?: string | null;
+  allowRecensions?: boolean;
   /** Current user's face role (only when authenticated) */
   myFaceRoleId?: number | null;
   myFaceRoleName?: string | null;
+  /** Server: first switch into this face */
+  myVisited?: boolean | null;
+  /** Server: face role onboarding confirmed */
+  myFaceRoleIntroCompleted?: boolean | null;
   pages: PageConfig[];
 }
 

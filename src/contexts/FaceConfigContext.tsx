@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useEffect, useCallback, useMemo } 
 import type { ReactNode } from 'react';
 import { useAuth } from './AuthContext';
 import { getFacesConfig } from '../api/config/getFacesConfig';
+import { markFaceVisited } from '../api/services/faceProfilesApi';
 import type { FaceConfig, FacesConfigResponse } from '../api/types/facesConfig';
 import { logger } from '../utils/logger';
 
@@ -84,10 +85,23 @@ export function FaceConfigProvider({ children }: { children: ReactNode }) {
     return availableFaces[0];
   }, [availableFaces, selectedFaceId]);
 
-  const selectFace = useCallback((faceId: number) => {
-    setSelectedFaceId(faceId);
-    localStorage.setItem(STORAGE_KEY, String(faceId));
-  }, []);
+  const selectFace = useCallback(
+    (faceId: number) => {
+      setSelectedFaceId(faceId);
+      localStorage.setItem(STORAGE_KEY, String(faceId));
+      if (!token) return;
+      void (async () => {
+        try {
+          await markFaceVisited(faceId, token);
+          const config = await getFacesConfig(token);
+          setAllFaces(config);
+        } catch {
+          // Face switch still applies locally; visit sync is best-effort
+        }
+      })();
+    },
+    [token]
+  );
 
   // Sync selected face id to storage when auto-corrected
   useEffect(() => {

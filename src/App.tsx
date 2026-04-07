@@ -41,6 +41,8 @@ import { ComponentListPage } from './pages/ComponentListPage';
 import { AlbumDetailPage } from './pages/AlbumDetailPage';
 import { BlogDetailPage } from './pages/BlogDetailPage';
 import { ReelDetailPage } from './pages/ReelDetailPage';
+import { FaceProfilesListPage } from './pages/FaceProfilesListPage';
+import { FaceProfileDetailPage } from './pages/FaceProfileDetailPage';
 import {
   X,
   Globe,
@@ -55,6 +57,7 @@ import {
   Shield,
   ShieldBan,
   UserCheck,
+  IdCard,
 } from 'lucide-react';
 import { useLocalizedLink } from './hooks/useLocalizedLink';
 import { useTranslation } from 'react-i18next';
@@ -70,7 +73,6 @@ import {
   FaceRoleSelectPanel,
   shouldShowFaceRolePanel,
   isFirstVisitToFace,
-  FACE_VISITED_KEY,
 } from './components/FaceRoleSelectPanel';
 import { EditProfileTab } from './components/EditProfileTab';
 import { logger } from './utils/logger';
@@ -117,6 +119,51 @@ function GuestRedirectToFaceHome() {
   const { selectedFace, getFaceHomePath } = useFaceConfig();
   if (!selectedFace) return <HomePage />;
   return <Navigate to={`/${lang}${getFaceHomePath()}`} replace />;
+}
+
+/**
+ * Keeps URL :faceIndex in sync with FaceConfigContext (selectFace) for profile routes.
+ */
+function SyncFaceFromProfileRoutes({ children }: { children: React.ReactNode }) {
+  const { t } = useTranslation('common');
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { selectedFace, availableFaces, selectFace, isLoading } = useFaceConfig();
+
+  useEffect(() => {
+    if (isLoading) return;
+    const parts = location.pathname.split('/').filter(Boolean);
+    if (parts.length < 3) return;
+    const lang = parts[0];
+    const urlFaceIdx = parts[1];
+    const rest = parts.slice(2).join('/');
+    const faceMatch = availableFaces.find(
+      (f) => f.index.toLowerCase() === urlFaceIdx.toLowerCase()
+    );
+    if (faceMatch) {
+      if (selectedFace?.id !== faceMatch.id) selectFace(faceMatch.id);
+      return;
+    }
+    if (selectedFace && rest) {
+      navigate(`/${lang}/${selectedFace.index}/${rest}`, { replace: true });
+    } else if (selectedFace) {
+      navigate(`/${lang}/${selectedFace.index}/profiles`, { replace: true });
+    }
+  }, [location.pathname, availableFaces, selectedFace, selectFace, navigate, isLoading]);
+
+  if (isLoading || !selectedFace) {
+    return <div style={{ padding: 24 }}>{t('faceProfiles.loading')}</div>;
+  }
+
+  const parts = location.pathname.split('/').filter(Boolean);
+  if (parts.length >= 3) {
+    const urlFaceIdx = parts[1];
+    if (urlFaceIdx.toLowerCase() !== selectedFace.index.toLowerCase()) {
+      return <div style={{ padding: 24 }}>{t('faceProfiles.syncingFace')}</div>;
+    }
+  }
+
+  return <>{children}</>;
 }
 
 /** Redirects guest from /:lang/login (or translated) to /:lang/:face/login so URL has face prefix. */
@@ -207,6 +254,16 @@ function PagesNav({ onNavigate }: { onNavigate: () => void }) {
         <Users size={20} />
         <span>{t('pages.users.title')}</span>
       </Link>
+      {selectedFace && (
+        <Link
+          to={getLocalizedPath(`/${selectedFace.index}/profiles`)}
+          className={`pages-nav-item ${isActive(`/${selectedFace.index}/profiles`) ? 'pages-nav-item--active' : ''}`}
+          onClick={onNavigate}
+        >
+          <IdCard size={20} />
+          <span>{t('faceProfiles.headerTitle')}</span>
+        </Link>
+      )}
     </div>
   );
 }
@@ -234,12 +291,9 @@ function AppRoutes() {
       setSettingsTab('faceRole');
     }, 0);
     return () => clearTimeout(id);
-  }, [selectedFace?.id, selectedFace]);
+  }, [selectedFace]);
 
   const handleClosePanel = () => {
-    if (selectedFace && !selectedFace.isPublic) {
-      localStorage.setItem(FACE_VISITED_KEY(selectedFace.id), '1');
-    }
     setSettingsOpen(false);
   };
 
@@ -658,6 +712,28 @@ function AppRoutes() {
                 element={
                   <ProtectedRoute>
                     <ReelDetailPage />
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* Face profile directory + detail — protected, URL includes face index */}
+              <Route
+                path=":faceIndex/profiles"
+                element={
+                  <ProtectedRoute>
+                    <SyncFaceFromProfileRoutes>
+                      <FaceProfilesListPage />
+                    </SyncFaceFromProfileRoutes>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path=":faceIndex/profile/:userId"
+                element={
+                  <ProtectedRoute>
+                    <SyncFaceFromProfileRoutes>
+                      <FaceProfileDetailPage />
+                    </SyncFaceFromProfileRoutes>
                   </ProtectedRoute>
                 }
               />

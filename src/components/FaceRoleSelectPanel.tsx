@@ -10,11 +10,6 @@ import type { FaceRoleOption } from '../api/types/facesConfig';
 import type { FaceConfig } from '../api/types/facesConfig';
 import './FaceRoleSelectPanel.scss';
 
-const STORAGE_PREFIX = 'face_role_chosen_';
-
-/** Storage key for "user has visited this face" (so we don't auto-open panel again). */
-export const FACE_VISITED_KEY = (faceId: number) => `face_visited_${faceId}`;
-
 interface FaceRoleSelectPanelProps {
   /** Current private face */
   face: FaceConfig;
@@ -63,8 +58,6 @@ export function FaceRoleSelectPanel({ face, token, onRoleSet, inPanel }: FaceRol
     setError(null);
     try {
       await setMyFaceRole(face.id, selectedRoleId, token);
-      localStorage.setItem(`${STORAGE_PREFIX}${face.id}`, '1');
-      localStorage.setItem(FACE_VISITED_KEY(face.id), '1');
       onRoleSet();
     } catch {
       setError(t('faceRoleSelect.saveError'));
@@ -123,9 +116,9 @@ export function shouldShowFaceRolePanel(face: FaceConfig | null): boolean {
   return true;
 }
 
-/** True if user has not yet visited this face (auto-open panel with face role tab). */
+/** True until user confirms face role onboarding (stored on server per UserFaceProfile). */
 // eslint-disable-next-line react-refresh/only-export-components
 export function isFirstVisitToFace(face: FaceConfig | null): boolean {
   if (!face || face.isPublic) return false;
-  return !localStorage.getItem(FACE_VISITED_KEY(face.id));
+  return face.myFaceRoleIntroCompleted !== true;
 }

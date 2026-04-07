@@ -16,6 +16,7 @@ import {
   Globe,
   Menu,
   Users,
+  IdCard,
 } from 'lucide-react';
 import { getPageIcon } from '../utils/pageIcons';
 import type { FaceConfig } from '../api/types/facesConfig';
@@ -136,6 +137,15 @@ export function Header({ onSettingsToggle, onMenuToggle, onProfileClick }: Heade
                 >
                   <Users size={20} />
                 </Link>
+                {selectedFace && (
+                  <Link
+                    to={getLocalizedPath(`/${selectedFace.index}/profiles`)}
+                    className={`header-page-icon ${isActive(`/${selectedFace.index}/profiles`) ? 'header-page-icon--active' : ''}`}
+                    title={t('faceProfiles.headerTitle')}
+                  >
+                    <IdCard size={20} />
+                  </Link>
+                )}
               </>
             )}
           </nav>
