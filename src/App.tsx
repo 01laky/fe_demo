@@ -38,6 +38,7 @@ import { ProfilePage } from './pages/ProfilePage';
 import { UsersPage } from './pages/UsersPage';
 import { UserDetailPage } from './pages/UserDetailPage';
 import { ComponentListPage } from './pages/ComponentListPage';
+import { ComponentDetailPage } from './pages/ComponentDetailPage';
 import { AlbumDetailPage } from './pages/AlbumDetailPage';
 import { BlogDetailPage } from './pages/BlogDetailPage';
 import { ReelDetailPage } from './pages/ReelDetailPage';
@@ -704,6 +705,15 @@ function AppRoutes() {
                 element={
                   <ProtectedRoute>
                     <ComponentListPage />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="detail/:componentTypeId/:entityId"
+                element={
+                  <ProtectedRoute>
+                    <ComponentDetailPage />
                   </ProtectedRoute>
                 }
               />

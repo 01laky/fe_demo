@@ -97,6 +97,8 @@ interface GridItem {
   title?: string | null;
   /** Icon key for header (from admin) */
   icon?: string | null;
+  /** When set, single `chatRoom` tile loads this room; otherwise first room in the face */
+  boundChatRoomId?: number;
 }
 
 interface GridSchema {
@@ -176,7 +178,7 @@ export function PageGridLayout({ gridSchemaJson }: PageGridLayoutProps) {
     if (ct === 'blog') return <Blog />;
     if (ct === 'blogGrid') return <BlogGrid />;
     if (ct === 'blogCarousel') return <BlogCarousel />;
-    if (ct === 'chatRoom') return <ChatRoom />;
+    if (ct === 'chatRoom') return <ChatRoom boundChatRoomId={item.boundChatRoomId} />;
     if (ct === 'chatRoomGrid') return <ChatRoomGrid />;
     if (ct === 'chatRoomCarousel') return <ChatRoomCarousel />;
     if (ct === 'userProfile') return <UserProfile />;

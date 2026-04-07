@@ -9,6 +9,7 @@
 
 import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import {
   Plus,
   List,
@@ -36,6 +37,7 @@ import { useFaceConfig } from '../contexts/FaceConfigContext';
 import { useAnimatedGradientStyle } from '../hooks/useAnimatedGradient';
 import { useLocalizedLink } from '../hooks/useLocalizedLink';
 import { COMPONENT_TYPE_ID } from '../constants/componentTypeIds';
+import { ChatRoomForm } from './grid/ChatRoomForm';
 import { AlbumForm } from './grid/AlbumForm';
 import { BlogForm } from './grid/BlogForm';
 import { ReelForm } from './grid/ReelForm';
@@ -94,6 +96,11 @@ function setStoredSettings(componentId: string, data: { autoplay?: boolean }) {
 const ALBUM_COMPONENT_TYPES: GridComponentType[] = ['album', 'albumGrid', 'albumCarousel'];
 const BLOG_COMPONENT_TYPES: GridComponentType[] = ['blog', 'blogGrid', 'blogCarousel'];
 const REEL_COMPONENT_TYPES: GridComponentType[] = ['reel', 'reelGrid', 'reelCarousel'];
+const CHAT_ROOM_COMPONENT_TYPES: GridComponentType[] = [
+  'chatRoom',
+  'chatRoomGrid',
+  'chatRoomCarousel',
+];
 
 export interface ComponentBlockProps {
   componentId: string;
@@ -150,6 +157,9 @@ export function ComponentBlock({
   const isAlbumType = ALBUM_COMPONENT_TYPES.includes(componentType);
   const isBlogType = BLOG_COMPONENT_TYPES.includes(componentType);
   const isReelType = REEL_COMPONENT_TYPES.includes(componentType);
+  const isChatRoomType = CHAT_ROOM_COMPONENT_TYPES.includes(componentType);
+  const isFaceHost = selectedFace?.myFaceRoleName === 'FACE_HOST';
+  const canCreateChatRoom = isChatRoomType && selectedFace?.chatRoomsCreate === true && !isFaceHost;
   const [panelOpen, setPanelOpen] = useState(false);
   const [panelTab, setPanelTab] = useState<'create' | 'settings'>('create');
   const [playing, setPlaying] = useState(autoplayFromStorage);
@@ -182,6 +192,15 @@ export function ComponentBlock({
       onReelSaved?.(reel);
     },
     [onReelSaved]
+  );
+
+  const handleChatRoomSaved = useCallback(
+    (roomId: number) => {
+      setPanelOpen(false);
+      toast.success('Chat room created');
+      navigate(getLocalizedPath(`/detail/${COMPONENT_TYPE_ID[componentType]}/${roomId}`));
+    },
+    [navigate, getLocalizedPath, componentType]
   );
 
   const closePanel = useCallback(() => setPanelOpen(false), []);
@@ -218,8 +237,18 @@ export function ComponentBlock({
             <button
               type="button"
               className="component-block-action-btn"
-              title="Create new"
-              onClick={() => openPanel('create')}
+              title={
+                isChatRoomType && !canCreateChatRoom
+                  ? isFaceHost
+                    ? 'Hosts cannot create chat rooms'
+                    : 'Chat room creation is disabled for this face'
+                  : 'Create new'
+              }
+              disabled={isChatRoomType && !canCreateChatRoom}
+              onClick={() => {
+                if (isChatRoomType && !canCreateChatRoom) return;
+                openPanel('create');
+              }}
             >
               <Plus size={16} />
             </button>
@@ -356,20 +385,36 @@ export function ComponentBlock({
           {isReelType && (
             <ReelForm editReel={editReel} onSaved={handleReelSaved} onCancel={closePanel} />
           )}
-          {!isAlbumType && !isBlogType && !isReelType && panelTab === 'create' && (
+          {isChatRoomType && panelTab === 'create' && canCreateChatRoom && (
+            <ChatRoomForm onSaved={handleChatRoomSaved} onCancel={closePanel} />
+          )}
+          {isChatRoomType && panelTab === 'create' && !canCreateChatRoom && (
             <div className="component-block-panel-section">
-              <h3 className="component-block-panel-heading">Create new {defaults.title}</h3>
               <p className="component-block-panel-desc">
-                Form for creating new content (configured per component type).
+                {isFaceHost
+                  ? 'Face hosts can browse chat rooms but cannot create them or participate.'
+                  : 'Creating chat rooms is not enabled for this face.'}
               </p>
-              <input
-                type="text"
-                className="component-block-panel-input"
-                placeholder="Title"
-                aria-label="Title"
-              />
             </div>
           )}
+          {!isAlbumType &&
+            !isBlogType &&
+            !isReelType &&
+            !isChatRoomType &&
+            panelTab === 'create' && (
+              <div className="component-block-panel-section">
+                <h3 className="component-block-panel-heading">Create new {defaults.title}</h3>
+                <p className="component-block-panel-desc">
+                  Form for creating new content (configured per component type).
+                </p>
+                <input
+                  type="text"
+                  className="component-block-panel-input"
+                  placeholder="Title"
+                  aria-label="Title"
+                />
+              </div>
+            )}
           {!isAlbumType && !isBlogType && !isReelType && panelTab === 'settings' && (
             <div className="component-block-panel-section">
               <h3 className="component-block-panel-heading">Component settings</h3>

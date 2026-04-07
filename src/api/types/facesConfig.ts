@@ -38,6 +38,8 @@ export interface FaceConfig {
   /** Profile directory visibility (API enum name) */
   visibility?: string | null;
   allowRecensions?: boolean;
+  /** When true, non-host members may create chat rooms from the app */
+  chatRoomsCreate?: boolean;
   /** Current user's face role (only when authenticated) */
   myFaceRoleId?: number | null;
   myFaceRoleName?: string | null;

@@ -1,37 +1,97 @@
 /**
- * ChatRoom - Single chat room card with room name, member count and last message
- *
- * Uses placeholder avatars. Layout adapts to container size.
+ * Single chat room tile: bound to a specific room from grid JSON, or first room in the face.
  */
 
+import { useEffect, useState, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Loader2 } from 'lucide-react';
+import { useAuth } from '../../contexts/AuthContext';
+import { useFaceConfig } from '../../contexts/FaceConfigContext';
+import { useLocalizedLink } from '../../hooks/useLocalizedLink';
+import { COMPONENT_TYPE_ID } from '../../constants/componentTypeIds';
+import {
+  getChatRoom,
+  listChatRooms,
+  type FaceChatRoomDto,
+} from '../../api/services/ChatRoomsService';
+import { ChatRoomCard } from './ChatRoomCard';
 import './ChatRoom.scss';
 
-export function ChatRoom() {
+export interface ChatRoomProps {
+  boundChatRoomId?: number;
+}
+
+export function ChatRoom({ boundChatRoomId }: ChatRoomProps) {
+  const { token } = useAuth();
+  const { selectedFace } = useFaceConfig();
+  const navigate = useNavigate();
+  const getLocalizedPath = useLocalizedLink();
+  const [room, setRoom] = useState<FaceChatRoomDto | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  const goDetail = useCallback(
+    (id: number) => {
+      navigate(getLocalizedPath(`/detail/${COMPONENT_TYPE_ID.chatRoom}/${id}`));
+    },
+    [navigate, getLocalizedPath]
+  );
+
+  useEffect(() => {
+    if (!selectedFace || !token) {
+      setLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+    (async () => {
+      setLoading(true);
+      try {
+        if (boundChatRoomId != null) {
+          const r = await getChatRoom(selectedFace.id, boundChatRoomId, token);
+          if (!cancelled) setRoom(r);
+        } else {
+          const list = await listChatRooms(selectedFace.id, token);
+          if (!cancelled) setRoom(list[0] ?? null);
+        }
+      } catch {
+        if (!cancelled) setRoom(null);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedFace, token, boundChatRoomId]);
+
+  if (!selectedFace || !token) {
+    return (
+      <div className="chatroom-component chatroom-component--empty">
+        <span className="chatroom-empty-text">Sign in to see chat rooms.</span>
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="chatroom-component chatroom-component--center">
+        <Loader2 className="chatroom-loading" size={24} />
+      </div>
+    );
+  }
+
+  if (!room) {
+    return (
+      <div className="chatroom-component chatroom-component--empty">
+        <span className="chatroom-empty-text">No chat rooms yet.</span>
+      </div>
+    );
+  }
+
   return (
-    <div className="chatroom-component">
-      <div className="chatroom-header">
-        <div className="chatroom-avatar">
-          <img src="https://picsum.photos/seed/room1/100/100" alt="Room" loading="lazy" />
-        </div>
-        <div className="chatroom-info">
-          <span className="chatroom-name">General Discussion</span>
-          <span className="chatroom-members">128 members • 24 online</span>
-        </div>
-      </div>
-      <div className="chatroom-messages">
-        <div className="chatroom-msg">
-          <span className="chatroom-msg-author">John D.</span>
-          <span className="chatroom-msg-text">Hey everyone! Has anyone tried the new feature?</span>
-        </div>
-        <div className="chatroom-msg">
-          <span className="chatroom-msg-author">Anna K.</span>
-          <span className="chatroom-msg-text">Yes, it's really cool! 🎉</span>
-        </div>
-        <div className="chatroom-msg">
-          <span className="chatroom-msg-author">Peter M.</span>
-          <span className="chatroom-msg-text">I'll check it out later today</span>
-        </div>
-      </div>
+    <div className="chatroom-component chatroom-component--tile">
+      <ChatRoomCard room={room} onOpen={() => goDetail(room.id)} />
     </div>
   );
 }
