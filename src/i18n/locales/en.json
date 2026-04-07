@@ -187,6 +187,9 @@
     "loading": "Loading...",
     "loadError": "Failed to load follows"
   },
+  "componentList": {
+    "notFound": "Component not found"
+  },
   "common": {
     "back": "Back",
     "faceRoleSelect": {

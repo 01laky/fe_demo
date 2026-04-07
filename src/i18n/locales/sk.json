@@ -187,6 +187,9 @@
     "loading": "Načítavam...",
     "loadError": "Nepodarilo sa načítať sledovaných"
   },
+  "componentList": {
+    "notFound": "Komponent nenájdený"
+  },
   "common": {
     "back": "Späť",
     "faceRoleSelect": {

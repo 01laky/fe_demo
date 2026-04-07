@@ -8,6 +8,7 @@
  */
 
 import { useState, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Plus,
   List,
@@ -33,6 +34,8 @@ import {
 } from 'lucide-react';
 import { useFaceConfig } from '../contexts/FaceConfigContext';
 import { useAnimatedGradientStyle } from '../hooks/useAnimatedGradient';
+import { useLocalizedLink } from '../hooks/useLocalizedLink';
+import { COMPONENT_TYPE_ID } from '../constants/componentTypeIds';
 import type { GridComponentType } from './PageGridLayout';
 import './ComponentBlock.scss';
 
@@ -112,6 +115,8 @@ export function ComponentBlock({
 }: ComponentBlockProps) {
   const { selectedFace } = useFaceConfig();
   const gradientVars = useAnimatedGradientStyle(selectedFace?.gradientSettings);
+  const navigate = useNavigate();
+  const getLocalizedPath = useLocalizedLink();
   const defaults = COMPONENT_DEFAULTS[componentType];
   const TitleIcon = defaults.icon;
   const title = titleProp ?? defaults.title;
@@ -170,7 +175,9 @@ export function ComponentBlock({
               type="button"
               className="component-block-action-btn"
               title="List page"
-              onClick={() => window.open('#list', '_self')}
+              onClick={() =>
+                navigate(getLocalizedPath(`/list/${COMPONENT_TYPE_ID[componentType]}`))
+              }
             >
               <List size={16} />
             </button>

@@ -37,6 +37,7 @@ import { RegisterPage } from './pages/RegisterPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { UsersPage } from './pages/UsersPage';
 import { UserDetailPage } from './pages/UserDetailPage';
+import { ComponentListPage } from './pages/ComponentListPage';
 import {
   X,
   Globe,
@@ -617,6 +618,16 @@ function AppRoutes() {
                   }
                 />
               ))}
+
+              {/* Component list — full-page paginated grid */}
+              <Route
+                path="list/:componentTypeId"
+                element={
+                  <ProtectedRoute>
+                    <ComponentListPage />
+                  </ProtectedRoute>
+                }
+              />
 
               {/* User detail — protected (more specific, must be before users list) */}
               {getRoutePaths('users').map((path) => (
