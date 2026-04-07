@@ -1,47 +1,44 @@
 /**
- * ReelCarousel - Paginated horizontal carousel of video reel cards
- *
- * The number of visible items recalculates based on container width.
+ * ReelCarousel - Horizontal carousel of reels (API-backed).
  */
 
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Loader2 } from 'lucide-react';
+import { useAuth } from '../../contexts/AuthContext';
+import { useFaceConfig } from '../../contexts/FaceConfigContext';
+import { useLocalizedLink } from '../../hooks/useLocalizedLink';
+import { getReels, type ReelItem } from '../../api/services/ReelsService';
 import './ReelCarousel.scss';
 
 const CARD_WIDTH = 120;
 const CARD_GAP = 6;
 
-interface ReelData {
-  id: number;
-  author: string;
-  likes: string;
-  thumbnail: string;
+export interface ReelCarouselProps {
+  page?: number;
+  totalPages?: number;
+  onPageChange?: (page: number, totalPages: number) => void;
 }
 
-function generateReels(total: number): ReelData[] {
-  const authors = [
-    '@jane_d',
-    '@john_s',
-    '@anna_k',
-    '@peter_m',
-    '@maria_l',
-    '@tom_h',
-    '@sara_b',
-    '@mike_w',
-  ];
-  return Array.from({ length: total }, (_, i) => ({
-    id: i + 1,
-    author: authors[i % authors.length],
-    likes: `${(Math.random() * 10).toFixed(1)}k`,
-    thumbnail: `https://picsum.photos/seed/reelC${i + 1}/200/350`,
-  }));
-}
-
-const ALL_REELS = generateReels(24);
-
-export function ReelCarousel() {
+export function ReelCarousel({
+  page: controlledPage,
+  totalPages: _ignored,
+  onPageChange,
+}: ReelCarouselProps = {}) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
+  const getLocalizedPath = useLocalizedLink();
+  const { token } = useAuth();
+  const { selectedFace } = useFaceConfig();
+  const faceId = selectedFace?.id;
+
+  const [items, setItems] = useState<ReelItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [visibleCount, setVisibleCount] = useState(3);
-  const [page, setPage] = useState(0);
+  const [internalPage, setInternalPage] = useState(0);
+  const isControlled = onPageChange != null;
+  const page = isControlled && controlledPage !== undefined ? controlledPage : internalPage;
 
   const calcVisible = useCallback(() => {
     if (!containerRef.current) return;
@@ -59,53 +56,149 @@ export function ReelCarousel() {
     return () => ro.disconnect();
   }, [calcVisible]);
 
-  const totalPages = Math.ceil(ALL_REELS.length / visibleCount);
+  useEffect(() => {
+    if (!token) {
+      setLoading(false);
+      setItems([]);
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      setLoading(true);
+      setLoadError(false);
+      try {
+        const data = await getReels(token, faceId);
+        if (!cancelled) setItems(data);
+      } catch {
+        if (!cancelled) {
+          setLoadError(true);
+          setItems([]);
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [token, faceId]);
+
+  const totalPages = Math.max(1, Math.ceil(items.length / visibleCount));
   const clampedPage = Math.min(page, Math.max(0, totalPages - 1));
   const visibleReels = useMemo(
-    () => ALL_REELS.slice(clampedPage * visibleCount, (clampedPage + 1) * visibleCount),
-    [clampedPage, visibleCount]
+    () => items.slice(clampedPage * visibleCount, (clampedPage + 1) * visibleCount),
+    [clampedPage, visibleCount, items]
   );
+
+  useEffect(() => {
+    onPageChange?.(clampedPage, totalPages);
+  }, [clampedPage, totalPages, onPageChange]);
+
+  const setPage = useCallback(
+    (value: number | ((prev: number) => number)) => {
+      const next =
+        typeof value === 'function'
+          ? value(isControlled ? (controlledPage ?? 0) : internalPage)
+          : value;
+      if (isControlled) onPageChange?.(Math.max(0, Math.min(next, totalPages - 1)), totalPages);
+      else setInternalPage(next);
+    },
+    [isControlled, controlledPage, internalPage, totalPages, onPageChange]
+  );
+
+  const showInternalNav = !isControlled;
+
+  if (!token) {
+    return (
+      <div className="reel-carousel-component reel-carousel-component--message" ref={containerRef}>
+        <p>Sign in to see reels.</p>
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="reel-carousel-component reel-carousel-component--message" ref={containerRef}>
+        <Loader2 size={24} className="reel-carousel-spinner" aria-label="Loading" />
+      </div>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <div className="reel-carousel-component reel-carousel-component--message" ref={containerRef}>
+        <p>Could not load reels.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="reel-carousel-component" ref={containerRef}>
-      <button
-        className="reel-carousel-nav reel-carousel-prev"
-        disabled={clampedPage === 0}
-        onClick={() => setPage((p) => p - 1)}
-      >
-        ‹
-      </button>
+      {showInternalNav && (
+        <button
+          type="button"
+          className="reel-carousel-nav reel-carousel-prev"
+          disabled={clampedPage === 0}
+          onClick={() => setPage((p) => p - 1)}
+        >
+          ‹
+        </button>
+      )}
 
       <div className="reel-carousel-track">
         {visibleReels.map((reel) => (
-          <div key={reel.id} className="reel-carousel-card" style={{ width: CARD_WIDTH }}>
-            <img src={reel.thumbnail} alt={reel.author} loading="lazy" />
+          <div
+            key={reel.id}
+            className="reel-carousel-card"
+            style={{ width: CARD_WIDTH }}
+            onClick={() => navigate(getLocalizedPath(`/reel/${reel.id}`))}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') navigate(getLocalizedPath(`/reel/${reel.id}`));
+            }}
+          >
+            <video
+              className="reel-carousel-card-video"
+              muted
+              playsInline
+              preload="metadata"
+              src={reel.videoUrl}
+            />
             <div className="reel-carousel-card-overlay">
-              <span className="reel-carousel-card-likes">♥ {reel.likes}</span>
-              <span className="reel-carousel-card-author">{reel.author}</span>
+              <span className="reel-carousel-card-title">{reel.title}</span>
+              <span className="reel-carousel-card-likes">♥ {reel.likesCount}</span>
             </div>
           </div>
         ))}
       </div>
 
-      <button
-        className="reel-carousel-nav reel-carousel-next"
-        disabled={clampedPage >= totalPages - 1}
-        onClick={() => setPage((p) => p + 1)}
-      >
-        ›
-      </button>
+      {showInternalNav && (
+        <button
+          type="button"
+          className="reel-carousel-nav reel-carousel-next"
+          disabled={clampedPage >= totalPages - 1}
+          onClick={() => setPage((p) => p + 1)}
+        >
+          ›
+        </button>
+      )}
 
-      {totalPages > 1 && (
+      {showInternalNav && totalPages > 1 && (
         <div className="reel-carousel-dots">
           {Array.from({ length: totalPages }, (_, i) => (
             <button
               key={i}
+              type="button"
               className={`reel-carousel-dot ${i === clampedPage ? 'active' : ''}`}
               onClick={() => setPage(i)}
             />
           ))}
         </div>
+      )}
+
+      {items.length === 0 && (
+        <p className="reel-carousel-empty">No reels yet. Use + to create one.</p>
       )}
     </div>
   );

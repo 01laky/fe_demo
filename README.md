@@ -382,6 +382,7 @@ This frontend is part of the `_mfai_demo` monorepo and integrates with:
 
 - **Backend API**: `be_demo` (ASP.NET Core)
 - **Database**: `db_demo` (PostgreSQL) - via backend
+- **Redis**: `redis_demo` - job queue via backend
 - **Admin**: `admin_demo` (separate admin panel)
 
 Use root-level scripts to manage all services:

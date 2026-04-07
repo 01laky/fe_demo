@@ -40,6 +40,7 @@ import { UserDetailPage } from './pages/UserDetailPage';
 import { ComponentListPage } from './pages/ComponentListPage';
 import { AlbumDetailPage } from './pages/AlbumDetailPage';
 import { BlogDetailPage } from './pages/BlogDetailPage';
+import { ReelDetailPage } from './pages/ReelDetailPage';
 import {
   X,
   Globe,
@@ -647,6 +648,16 @@ function AppRoutes() {
                 element={
                   <ProtectedRoute>
                     <BlogDetailPage />
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* Reel detail — protected */}
+              <Route
+                path="reel/:id"
+                element={
+                  <ProtectedRoute>
+                    <ReelDetailPage />
                   </ProtectedRoute>
                 }
               />

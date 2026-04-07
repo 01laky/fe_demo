@@ -1,37 +1,87 @@
 /**
- * Reel - Single vertical video reel with play overlay and engagement stats
- *
- * Uses placeholder image. Styled as a vertical phone-ratio video card.
+ * Reel - Shows the first reel for the current face with link to detail.
  */
 
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { Loader2 } from 'lucide-react';
+import { useAuth } from '../../contexts/AuthContext';
+import { useFaceConfig } from '../../contexts/FaceConfigContext';
+import { useLocalizedLink } from '../../hooks/useLocalizedLink';
+import { getReels, type ReelItem } from '../../api/services/ReelsService';
 import './Reel.scss';
 
 export function Reel() {
+  const { token } = useAuth();
+  const { selectedFace } = useFaceConfig();
+  const getLocalizedPath = useLocalizedLink();
+  const faceId = selectedFace?.id;
+
+  const [item, setItem] = useState<ReelItem | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!token) {
+      setLoading(false);
+      setItem(null);
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      setLoading(true);
+      try {
+        const list = await getReels(token, faceId);
+        if (!cancelled) setItem(list[0] ?? null);
+      } catch {
+        if (!cancelled) setItem(null);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [token, faceId]);
+
+  if (!token) {
+    return (
+      <div className="reel-component reel-component--message">
+        <p>Sign in to see reels.</p>
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="reel-component reel-component--message">
+        <Loader2 size={28} className="reel-component-spinner" aria-label="Loading" />
+      </div>
+    );
+  }
+
+  if (!item) {
+    return (
+      <div className="reel-component reel-component--message">
+        <p>No reels yet. Use + to add one.</p>
+      </div>
+    );
+  }
+
   return (
     <div className="reel-component">
-      <img
-        className="reel-video"
-        src="https://picsum.photos/seed/reel1/400/700"
-        alt="Reel"
-        loading="lazy"
-      />
-      <div className="reel-play-overlay">▶</div>
-      <div className="reel-overlay">
-        <div className="reel-engagement">
-          <span className="reel-stat">♥ 2.4k</span>
-          <span className="reel-stat">💬 128</span>
-          <span className="reel-stat">↗ 56</span>
+      <Link className="reel-component-link" to={getLocalizedPath(`/reel/${item.id}`)}>
+        <video className="reel-video" muted playsInline preload="metadata" src={item.videoUrl} />
+        <div className="reel-play-overlay">▶</div>
+        <div className="reel-overlay">
+          <div className="reel-engagement">
+            <span className="reel-stat">♥ {item.likesCount}</span>
+            <span className="reel-stat">💬 {item.commentsCount}</span>
+          </div>
+          <div className="reel-author">
+            <span className="reel-author-name">{item.title}</span>
+          </div>
         </div>
-        <div className="reel-author">
-          <img
-            className="reel-author-avatar"
-            src="https://picsum.photos/seed/reelUser1/50/50"
-            alt="Author"
-            loading="lazy"
-          />
-          <span className="reel-author-name">@creative_jane</span>
-        </div>
-      </div>
+      </Link>
     </div>
   );
 }

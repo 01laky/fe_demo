@@ -38,8 +38,10 @@ import { useLocalizedLink } from '../hooks/useLocalizedLink';
 import { COMPONENT_TYPE_ID } from '../constants/componentTypeIds';
 import { AlbumForm } from './grid/AlbumForm';
 import { BlogForm } from './grid/BlogForm';
+import { ReelForm } from './grid/ReelForm';
 import type { AlbumItem } from '../api/services/AlbumsService';
 import type { BlogItem } from '../api/services/BlogsService';
+import type { ReelItem } from '../api/services/ReelsService';
 import type { GridComponentType } from './PageGridLayout';
 import './ComponentBlock.scss';
 
@@ -91,6 +93,7 @@ function setStoredSettings(componentId: string, data: { autoplay?: boolean }) {
 
 const ALBUM_COMPONENT_TYPES: GridComponentType[] = ['album', 'albumGrid', 'albumCarousel'];
 const BLOG_COMPONENT_TYPES: GridComponentType[] = ['blog', 'blogGrid', 'blogCarousel'];
+const REEL_COMPONENT_TYPES: GridComponentType[] = ['reel', 'reelGrid', 'reelCarousel'];
 
 export interface ComponentBlockProps {
   componentId: string;
@@ -112,6 +115,9 @@ export interface ComponentBlockProps {
   /** Blog to edit (opens panel in edit mode) */
   editBlog?: BlogItem | null;
   onBlogSaved?: (blog: BlogItem) => void;
+  /** Reel to edit (opens panel in edit mode) */
+  editReel?: ReelItem | null;
+  onReelSaved?: (reel: ReelItem) => void;
 }
 
 export function ComponentBlock({
@@ -129,6 +135,8 @@ export function ComponentBlock({
   onAlbumSaved,
   editBlog,
   onBlogSaved,
+  editReel,
+  onReelSaved,
 }: ComponentBlockProps) {
   const { selectedFace } = useFaceConfig();
   const gradientVars = useAnimatedGradientStyle(selectedFace?.gradientSettings);
@@ -141,6 +149,7 @@ export function ComponentBlock({
 
   const isAlbumType = ALBUM_COMPONENT_TYPES.includes(componentType);
   const isBlogType = BLOG_COMPONENT_TYPES.includes(componentType);
+  const isReelType = REEL_COMPONENT_TYPES.includes(componentType);
   const [panelOpen, setPanelOpen] = useState(false);
   const [panelTab, setPanelTab] = useState<'create' | 'settings'>('create');
   const [playing, setPlaying] = useState(autoplayFromStorage);
@@ -165,6 +174,14 @@ export function ComponentBlock({
       onBlogSaved?.(blog);
     },
     [onBlogSaved]
+  );
+
+  const handleReelSaved = useCallback(
+    (reel: ReelItem) => {
+      setPanelOpen(false);
+      onReelSaved?.(reel);
+    },
+    [onReelSaved]
   );
 
   const closePanel = useCallback(() => setPanelOpen(false), []);
@@ -287,7 +304,7 @@ export function ComponentBlock({
         aria-hidden={!panelOpen}
       >
         <div className="component-block-panel-header">
-          {!isAlbumType && !isBlogType && (
+          {!isAlbumType && !isBlogType && !isReelType && (
             <nav className="component-block-panel-tabs">
               <button
                 type="button"
@@ -315,6 +332,11 @@ export function ComponentBlock({
               {editBlog ? 'Edit Blog' : 'Create Blog'}
             </span>
           )}
+          {isReelType && (
+            <span className="component-block-panel-tab component-block-panel-tab--active">
+              {editReel ? 'Edit Reel' : 'Create Reel'}
+            </span>
+          )}
           <button
             type="button"
             className="component-block-panel-close"
@@ -331,7 +353,10 @@ export function ComponentBlock({
           {isBlogType && (
             <BlogForm editBlog={editBlog} onSaved={handleBlogSaved} onCancel={closePanel} />
           )}
-          {!isAlbumType && !isBlogType && panelTab === 'create' && (
+          {isReelType && (
+            <ReelForm editReel={editReel} onSaved={handleReelSaved} onCancel={closePanel} />
+          )}
+          {!isAlbumType && !isBlogType && !isReelType && panelTab === 'create' && (
             <div className="component-block-panel-section">
               <h3 className="component-block-panel-heading">Create new {defaults.title}</h3>
               <p className="component-block-panel-desc">
@@ -345,7 +370,7 @@ export function ComponentBlock({
               />
             </div>
           )}
-          {!isAlbumType && !isBlogType && panelTab === 'settings' && (
+          {!isAlbumType && !isBlogType && !isReelType && panelTab === 'settings' && (
             <div className="component-block-panel-section">
               <h3 className="component-block-panel-heading">Component settings</h3>
               <p className="component-block-panel-desc">
