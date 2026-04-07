@@ -1,14 +1,4 @@
-import {
-  Home,
-  List,
-  FileText,
-  FilePlus,
-  FileEdit,
-  FileBox,
-  LogIn,
-  UserPlus,
-  Settings,
-} from 'lucide-react';
+import { Home, FileText, FileBox, LogIn, UserPlus, Settings } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
 /** Map page name / path / type to a lucide icon */
@@ -22,14 +12,11 @@ export function getPageIcon(
   const typeIdx = (pageTypeIndex ?? '').toLowerCase();
 
   if (typeIdx === 'home') return Home;
-  if (typeIdx === 'list') return List;
-  if (typeIdx === 'detail') return FileText;
-  if (typeIdx === 'edit') return FileEdit;
-  if (typeIdx === 'create') return FilePlus;
   if (typeIdx === 'static') return FileBox;
+  if (typeIdx === 'wall') return FileText;
 
   if (name.includes('home') || path.includes('home')) return Home;
-  if (name.includes('list') || path.includes('list')) return List;
+  if (name.includes('wall') || path.includes('wall')) return FileText;
   if (name.includes('detail') || path.includes('detail')) return FileText;
   if (name.includes('login') || path.includes('login')) return LogIn;
   if (name.includes('register') || path.includes('register')) return UserPlus;
