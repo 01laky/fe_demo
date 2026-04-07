@@ -17,6 +17,8 @@ import {
   Menu,
   Users,
   IdCard,
+  LayoutGrid,
+  Plus,
 } from 'lucide-react';
 import { getPageIcon } from '../utils/pageIcons';
 import type { FaceConfig } from '../api/types/facesConfig';
@@ -27,6 +29,8 @@ interface HeaderProps {
   onMenuToggle?: () => void;
   /** When provided, clicking the profile area opens the slide-out panel with Edit profile tab selected */
   onProfileClick?: () => void;
+  /** Open top panel to create a new story */
+  onStoriesCreate?: () => void;
 }
 
 /** Resolve current face page name from pathname and face config */
@@ -45,7 +49,12 @@ function getCurrentPageName(pathname: string, selectedFace: FaceConfig | null): 
   return page?.name ?? null;
 }
 
-export function Header({ onSettingsToggle, onMenuToggle, onProfileClick }: HeaderProps) {
+export function Header({
+  onSettingsToggle,
+  onMenuToggle,
+  onProfileClick,
+  onStoriesCreate,
+}: HeaderProps) {
   const { t } = useTranslation('common');
   const getLocalizedPath = useLocalizedLink();
   const location = useLocation();
@@ -145,6 +154,25 @@ export function Header({ onSettingsToggle, onMenuToggle, onProfileClick }: Heade
                   >
                     <IdCard size={20} />
                   </Link>
+                )}
+                {selectedFace && (
+                  <Link
+                    to={getLocalizedPath(`/${selectedFace.index}/stories`)}
+                    className={`header-page-icon ${isActive(`/${selectedFace.index}/stories`) ? 'header-page-icon--active' : ''}`}
+                    title={t('stories.headerListTitle')}
+                  >
+                    <LayoutGrid size={20} />
+                  </Link>
+                )}
+                {selectedFace && onStoriesCreate && (
+                  <button
+                    type="button"
+                    className="header-page-icon"
+                    title={t('stories.headerCreateTitle')}
+                    onClick={onStoriesCreate}
+                  >
+                    <Plus size={20} />
+                  </button>
                 )}
               </>
             )}

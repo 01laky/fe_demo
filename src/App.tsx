@@ -43,6 +43,8 @@ import { BlogDetailPage } from './pages/BlogDetailPage';
 import { ReelDetailPage } from './pages/ReelDetailPage';
 import { FaceProfilesListPage } from './pages/FaceProfilesListPage';
 import { FaceProfileDetailPage } from './pages/FaceProfileDetailPage';
+import { StoriesListPage } from './pages/StoriesListPage';
+import { StoriesCreateTopPanel } from './components/StoriesCreateTopPanel';
 import {
   X,
   Globe,
@@ -58,6 +60,7 @@ import {
   ShieldBan,
   UserCheck,
   IdCard,
+  LayoutGrid,
 } from 'lucide-react';
 import { useLocalizedLink } from './hooks/useLocalizedLink';
 import { useTranslation } from 'react-i18next';
@@ -264,6 +267,16 @@ function PagesNav({ onNavigate }: { onNavigate: () => void }) {
           <span>{t('faceProfiles.headerTitle')}</span>
         </Link>
       )}
+      {selectedFace && (
+        <Link
+          to={getLocalizedPath(`/${selectedFace.index}/stories`)}
+          className={`pages-nav-item ${isActive(`/${selectedFace.index}/stories`) ? 'pages-nav-item--active' : ''}`}
+          onClick={onNavigate}
+        >
+          <LayoutGrid size={20} />
+          <span>{t('stories.navLabel')}</span>
+        </Link>
+      )}
     </div>
   );
 }
@@ -280,6 +293,7 @@ function AppRoutes() {
   const { availableFaces, selectedFace, selectFace, isLoading, error, reload } = useFaceConfig();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [settingsTab, setSettingsTab] = useState<string>('settings');
+  const [storiesCreateOpen, setStoriesCreateOpen] = useState(false);
   const gradientVars = useAnimatedGradientStyle(selectedFace?.gradientSettings);
 
   // First visit to a private face: open slide-out panel with Face role tab by default (deferred to avoid setState-in-effect lint)
@@ -373,7 +387,15 @@ function AppRoutes() {
           setSettingsTab('profile');
           setSettingsOpen(true);
         }}
+        onStoriesCreate={isAuthenticated && token ? () => setStoriesCreateOpen(true) : undefined}
       />
+      {isAuthenticated && token && (
+        <StoriesCreateTopPanel
+          open={storiesCreateOpen}
+          onClose={() => setStoriesCreateOpen(false)}
+          token={token}
+        />
+      )}
       <div className="app-content-area">
         <div
           className={`settings-panel ${settingsOpen ? 'settings-panel--open' : ''}`}
@@ -733,6 +755,17 @@ function AppRoutes() {
                   <ProtectedRoute>
                     <SyncFaceFromProfileRoutes>
                       <FaceProfileDetailPage />
+                    </SyncFaceFromProfileRoutes>
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path=":faceIndex/stories"
+                element={
+                  <ProtectedRoute>
+                    <SyncFaceFromProfileRoutes>
+                      <StoriesListPage />
                     </SyncFaceFromProfileRoutes>
                   </ProtectedRoute>
                 }
