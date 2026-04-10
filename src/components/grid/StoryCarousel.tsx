@@ -9,15 +9,43 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useFaceConfig } from '../../contexts/FaceConfigContext';
 import { useLocalizedLink } from '../../hooks/useLocalizedLink';
 import { fetchStoriesForFace, type StoryListItem } from '../../api/services/storiesApi';
-import { storyRingImageUrl } from './gridDisplayHelpers';
 import {
   useStablePaginationEmit,
   useSyncedPaginationReport,
 } from '../../hooks/usePaginationParentSync';
+import { useStoryRingSlideshow } from '../../hooks/useStoryRingSlideshow';
 import './StoryCarousel.scss';
 
-const CARD_WIDTH = 76;
-const CARD_GAP = 10;
+/** Thumb width; tile is 1:2 portrait; gap matches story grid */
+const CARD_WIDTH = 72;
+const CARD_GAP = 8;
+
+function StoryCarouselCard({
+  story,
+  token,
+  faceId,
+  listHref,
+}: {
+  story: StoryListItem;
+  token: string;
+  faceId: number;
+  listHref: string;
+}) {
+  const { src, ringHandlers } = useStoryRingSlideshow(token, faceId, story);
+  return (
+    <Link
+      className="story-carousel-card"
+      style={{ width: CARD_WIDTH }}
+      to={listHref}
+      {...ringHandlers}
+    >
+      <div className="story-carousel-thumb">
+        <img src={src} alt={story.creatorName || story.title} loading="lazy" />
+      </div>
+      <span className="story-carousel-card-name">{story.creatorName || 'Story'}</span>
+    </Link>
+  );
+}
 
 export interface StoryCarouselProps {
   page?: number;
@@ -161,21 +189,13 @@ export function StoryCarousel({
 
       <div className="story-carousel-track">
         {visibleStories.map((story) => (
-          <Link
+          <StoryCarouselCard
             key={story.id}
-            className="story-carousel-card"
-            style={{ width: CARD_WIDTH }}
-            to={listHref}
-          >
-            <div className="story-carousel-ring">
-              <img
-                src={storyRingImageUrl(story.id, story.coverUrl)}
-                alt={story.creatorName || story.title}
-                loading="lazy"
-              />
-            </div>
-            <span className="story-carousel-card-name">{story.creatorName || 'Story'}</span>
-          </Link>
+            story={story}
+            token={token!}
+            faceId={faceId!}
+            listHref={listHref}
+          />
         ))}
       </div>
 

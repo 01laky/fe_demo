@@ -2,7 +2,15 @@
  * ReelGrid - Paginated grid of reels for the current face (API-backed).
  */
 
-import { useState, useRef, useEffect, useCallback, useMemo, type CSSProperties } from 'react';
+import {
+  useState,
+  useRef,
+  useEffect,
+  useCallback,
+  useMemo,
+  type CSSProperties,
+  type SyntheticEvent,
+} from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
@@ -39,8 +47,8 @@ export function ReelGrid({ page: controlledPage, onPageChange }: ReelGridProps =
 
   const observeGrid = Boolean(token) && !loading && !loadError;
   const { itemsPerPage, gridCols } = useFillGridPagination(itemsRef, observeGrid, isControlled, {
-    gap: 4,
-    minColWidth: 100,
+    gap: 10,
+    minColWidth: 125,
     imageHeightFromCellWidth: 16 / 9,
     infoBlockPx: 0,
   });
@@ -94,6 +102,21 @@ export function ReelGrid({ page: controlledPage, onPageChange }: ReelGridProps =
     [isControlled, controlledPage, internalPage, totalPages, emitPage]
   );
 
+  const playPreview = useCallback((e: SyntheticEvent<HTMLDivElement>) => {
+    const video = e.currentTarget.querySelector('video');
+    if (!video) return;
+    void video.play().catch(() => {});
+  }, []);
+
+  const stopPreview = useCallback((e: SyntheticEvent<HTMLDivElement>) => {
+    const video = e.currentTarget.querySelector('video');
+    if (!video) return;
+    video.pause();
+    video.currentTime = 0;
+  }, []);
+
+  const itemsStyle = { '--grid-cols': gridCols, '--reel-grid-gap': '10px' } as CSSProperties;
+
   const showInternalPagination = !isControlled;
 
   if (!token) {
@@ -120,8 +143,6 @@ export function ReelGrid({ page: controlledPage, onPageChange }: ReelGridProps =
     );
   }
 
-  const itemsStyle = { '--grid-cols': gridCols } as CSSProperties;
-
   return (
     <div className="reel-grid-component">
       <div className="reel-grid-items" ref={itemsRef} style={itemsStyle}>
@@ -135,11 +156,16 @@ export function ReelGrid({ page: controlledPage, onPageChange }: ReelGridProps =
             onKeyDown={(e) => {
               if (e.key === 'Enter') navigate(getLocalizedPath(`/reel/${reel.id}`));
             }}
+            onMouseEnter={playPreview}
+            onMouseLeave={stopPreview}
+            onFocus={playPreview}
+            onBlur={stopPreview}
           >
             <video
               className="reel-grid-card-video"
               muted
               playsInline
+              loop
               preload="metadata"
               src={reel.videoUrl}
             />

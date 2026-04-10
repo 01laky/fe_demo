@@ -1,21 +1,100 @@
 /**
- * StoryGrid - Published stories for the current face (API-backed)
+ * StoryGrid - Published stories for the current face (API-backed).
+ * Layout (cols, rows, thumb size, itemsPerPage) from container size — same idea as AlbumGrid.
  */
 
-import { useState, useRef, useEffect, useCallback, useMemo, type CSSProperties } from 'react';
+import {
+  useState,
+  useRef,
+  useEffect,
+  useLayoutEffect,
+  useCallback,
+  useMemo,
+  type CSSProperties,
+} from 'react';
 import { Link } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useFaceConfig } from '../../contexts/FaceConfigContext';
 import { useLocalizedLink } from '../../hooks/useLocalizedLink';
 import { fetchStoriesForFace, type StoryListItem } from '../../api/services/storiesApi';
-import { storyRingImageUrl } from './gridDisplayHelpers';
 import {
   useStablePaginationEmit,
   useSyncedPaginationReport,
 } from '../../hooks/usePaginationParentSync';
-import { useFillGridPagination } from '../../hooks/useFillGridPagination';
+import { useStoryRingSlideshow } from '../../hooks/useStoryRingSlideshow';
+import { computeStoryGridLayout, type StoryGridLayout } from '../../utils/computeStoryGridLayout';
 import './StoryGrid.scss';
+
+const STORY_GRID_GAP = 8;
+const STORY_LABEL_PX = 22;
+const DEFAULT_ITEMS_PER_PAGE = 8;
+
+/** Floor for thumb width; thumb image height = 2× (1:2). 75px → 150px tall vs former 44→88 (~+70% height). */
+const STORY_MIN_THUMB_WIDTH_PX = 75;
+
+const STORY_GRID_LAYOUT_OPTS = {
+  gap: STORY_GRID_GAP,
+  minThumbWidthPx: STORY_MIN_THUMB_WIDTH_PX,
+  labelPx: STORY_LABEL_PX,
+  maxCols: 12,
+  maxRows: 10,
+  maxItemsPerPage: 60,
+} as const;
+
+function StoryGridCard({
+  story,
+  token,
+  faceId,
+  listHref,
+  thumbW,
+  labelPx,
+}: {
+  story: StoryListItem;
+  token: string;
+  faceId: number;
+  listHref: string;
+  thumbW: number;
+  labelPx: number;
+}) {
+  const { src, ringHandlers } = useStoryRingSlideshow(token, faceId, story);
+  const thumbH = thumbW * 2;
+  return (
+    <Link
+      className="story-grid-card story-grid-card--sized"
+      to={listHref}
+      style={{ width: thumbW, height: thumbH + labelPx }}
+      {...ringHandlers}
+    >
+      <div className="story-grid-thumb" style={{ width: thumbW, height: thumbH }}>
+        <img src={src} alt={story.title} loading="lazy" />
+      </div>
+      <span className="story-grid-card-name">{story.creatorName || 'Story'}</span>
+    </Link>
+  );
+}
+
+function StoryGridCardFallback({
+  story,
+  token,
+  faceId,
+  listHref,
+}: {
+  story: StoryListItem;
+  token: string;
+  faceId: number;
+  listHref: string;
+}) {
+  const { src, ringHandlers } = useStoryRingSlideshow(token, faceId, story);
+  return (
+    <Link className="story-grid-card" to={listHref} {...ringHandlers}>
+      <div className="story-grid-thumb story-grid-thumb--fallback">
+        <img src={src} alt={story.title} loading="lazy" />
+      </div>
+      <span className="story-grid-card-name">{story.creatorName || 'Story'}</span>
+    </Link>
+  );
+}
 
 export interface StoryGridProps {
   page?: number;
@@ -35,16 +114,45 @@ export function StoryGrid({ page: controlledPage, onPageChange }: StoryGridProps
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
   const [internalPage, setInternalPage] = useState(0);
+  const [gridLayout, setGridLayout] = useState<StoryGridLayout | null>(null);
+
   const isControlled = onPageChange != null;
   const page = isControlled && controlledPage !== undefined ? controlledPage : internalPage;
 
   const observeGrid =
     Boolean(token) && faceId != null && Boolean(faceIndex) && !loading && !loadError;
-  const { itemsPerPage, gridCols } = useFillGridPagination(itemsRef, observeGrid, isControlled, {
-    gap: 6,
-    minColWidth: 72,
-    fixedCardHeightPx: 76,
-  });
+
+  const measureGridLayout = useCallback(() => {
+    const el = itemsRef.current;
+    if (!el) return;
+    const w = el.clientWidth;
+    const h = el.clientHeight;
+    if (w <= 0 || h <= 0) return;
+    const next = computeStoryGridLayout(w, h, STORY_GRID_LAYOUT_OPTS);
+    if (!next) return;
+    setGridLayout((prev) =>
+      prev &&
+      prev.cols === next.cols &&
+      prev.rows === next.rows &&
+      prev.thumbW === next.thumbW &&
+      prev.itemsPerPage === next.itemsPerPage
+        ? prev
+        : next
+    );
+  }, []);
+
+  useLayoutEffect(() => {
+    if (!observeGrid) {
+      setGridLayout(null);
+      return;
+    }
+    measureGridLayout();
+    const el = itemsRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(() => measureGridLayout());
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [observeGrid, measureGridLayout]);
 
   useEffect(() => {
     if (!token || faceId == null) {
@@ -72,6 +180,8 @@ export function StoryGrid({ page: controlledPage, onPageChange }: StoryGridProps
       cancelled = true;
     };
   }, [token, faceId]);
+
+  const itemsPerPage = gridLayout?.itemsPerPage ?? DEFAULT_ITEMS_PER_PAGE;
 
   const totalPages = Math.max(1, Math.ceil(stories.length / itemsPerPage));
   const clampedPage = Math.min(page, Math.max(0, totalPages - 1));
@@ -122,23 +232,42 @@ export function StoryGrid({ page: controlledPage, onPageChange }: StoryGridProps
     );
   }
 
-  const itemsStyle = { '--grid-cols': gridCols } as CSSProperties;
+  const itemsStyle = {
+    gap: STORY_GRID_GAP,
+    ...(gridLayout
+      ? {
+          gridTemplateColumns: `repeat(${gridLayout.cols}, minmax(0, 1fr))`,
+          gridTemplateRows: `repeat(${gridLayout.rows}, minmax(0, 1fr))`,
+        }
+      : { gridTemplateColumns: 'repeat(4, minmax(0, 1fr))' }),
+  } as CSSProperties;
+
+  const sizedClass = gridLayout ? ' story-grid-items--sized' : '';
 
   return (
     <div className="story-grid-component">
-      <div className="story-grid-items" ref={itemsRef} style={itemsStyle}>
-        {visibleStories.map((story) => (
-          <Link key={story.id} className="story-grid-card" to={listHref}>
-            <div className="story-grid-ring">
-              <img
-                src={storyRingImageUrl(story.id, story.coverUrl)}
-                alt={story.title}
-                loading="lazy"
-              />
-            </div>
-            <span className="story-grid-card-name">{story.creatorName || 'Story'}</span>
-          </Link>
-        ))}
+      <div className={`story-grid-items${sizedClass}`} ref={itemsRef} style={itemsStyle}>
+        {visibleStories.map((story) =>
+          gridLayout ? (
+            <StoryGridCard
+              key={story.id}
+              story={story}
+              token={token}
+              faceId={faceId}
+              listHref={listHref}
+              thumbW={gridLayout.thumbW}
+              labelPx={STORY_LABEL_PX}
+            />
+          ) : (
+            <StoryGridCardFallback
+              key={story.id}
+              story={story}
+              token={token}
+              faceId={faceId}
+              listHref={listHref}
+            />
+          )
+        )}
       </div>
       {stories.length === 0 && <p className="story-grid-empty">No active stories.</p>}
       {showInternalPagination && totalPages > 1 && (

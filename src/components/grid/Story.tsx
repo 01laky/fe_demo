@@ -21,21 +21,30 @@ export function Story() {
 
   const [story, setStory] = useState<StoryListItem | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
 
   useEffect(() => {
     if (!token || faceId == null) {
       setLoading(false);
       setStory(null);
+      setLoadError(false);
       return;
     }
     let cancelled = false;
     (async () => {
       setLoading(true);
+      setLoadError(false);
       try {
         const list = await fetchStoriesForFace(token, faceId);
-        if (!cancelled) setStory(list[0] ?? null);
+        if (!cancelled) {
+          setStory(list[0] ?? null);
+          setLoadError(false);
+        }
       } catch {
-        if (!cancelled) setStory(null);
+        if (!cancelled) {
+          setStory(null);
+          setLoadError(true);
+        }
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -61,6 +70,14 @@ export function Story() {
     );
   }
 
+  if (loadError) {
+    return (
+      <div className="story-component story-component--message">
+        <span className="story-empty-text">Could not load stories.</span>
+      </div>
+    );
+  }
+
   if (!story) {
     return (
       <div className="story-component story-component--message">
@@ -77,9 +94,9 @@ export function Story() {
 
   return (
     <Link className="story-component story-component--link" to={href}>
-      <div className="story-ring">
+      <div className="story-thumb">
         <img
-          className="story-avatar"
+          className="story-thumb-img"
           src={storyRingImageUrl(story.id, story.coverUrl)}
           alt={story.title}
           loading="lazy"

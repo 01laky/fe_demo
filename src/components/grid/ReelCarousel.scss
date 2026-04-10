@@ -62,10 +62,10 @@
 .reel-carousel-track {
   flex: 1;
   display: flex;
-  gap: 6px;
+  gap: 10px;
   justify-content: center;
   overflow: hidden;
-  padding: 0 6px;
+  padding: 0 8px;
 }
 
 .reel-carousel-card {
@@ -88,7 +88,7 @@
 
 .reel-carousel-card-video {
   width: 100%;
-  height: 180px;
+  height: 225px;
   object-fit: cover;
   display: block;
 }

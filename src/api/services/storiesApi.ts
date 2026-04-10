@@ -32,6 +32,53 @@ function authHeaders(token: string): Record<string, string> {
   return { Authorization: `Bearer ${token}` };
 }
 
+/** Absolute URL for story image paths returned as `/uploads/...`. */
+export function resolveApiMediaUrl(url: string): string {
+  if (!url) return '';
+  if (/^https?:\/\//i.test(url)) return url;
+  const base = env.apiUrl.replace(/\/$/, '');
+  return `${base}${url.startsWith('/') ? url : `/${url}`}`;
+}
+
+export type StoryDetailImageRow = {
+  id: number;
+  imageUrl: string;
+  description: string | null;
+  sortOrder: number;
+};
+
+type StoryDetailDto = {
+  images: StoryDetailImageRow[];
+};
+
+const storySlideshowUrlsCache = new Map<number, string[]>();
+
+/**
+ * Ordered absolute image URLs for a story (cached). Used for hover slideshow in grid/carousel.
+ */
+export async function fetchStorySlideshowImageUrls(
+  token: string,
+  storyId: number,
+  faceId: number
+): Promise<string[]> {
+  const cached = storySlideshowUrlsCache.get(storyId);
+  if (cached != null && cached.length > 1) return cached;
+
+  const { data } = await axios.get<StoryDetailDto>(`${env.apiUrl}/api/stories/${storyId}`, {
+    params: { faceId },
+    headers: authHeaders(token),
+  });
+  const urls = (data.images ?? [])
+    .slice()
+    .sort((a, b) => a.sortOrder - b.sortOrder)
+    .map((row) => resolveApiMediaUrl(row.imageUrl));
+
+  if (urls.length > 1) storySlideshowUrlsCache.set(storyId, urls);
+  else storySlideshowUrlsCache.delete(storyId);
+
+  return urls;
+}
+
 export async function fetchStoriesForFace(
   token: string,
   faceId: number

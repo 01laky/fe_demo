@@ -2,7 +2,7 @@
  * ReelCarousel - Horizontal carousel of reels (API-backed).
  */
 
-import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import { useState, useRef, useEffect, useCallback, useMemo, type SyntheticEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
@@ -15,8 +15,9 @@ import {
 } from '../../hooks/usePaginationParentSync';
 import './ReelCarousel.scss';
 
-const CARD_WIDTH = 120;
-const CARD_GAP = 6;
+/** ~25% wider than previous 120px; spacing between cards */
+const CARD_WIDTH = 150;
+const CARD_GAP = 10;
 
 export interface ReelCarouselProps {
   page?: number;
@@ -43,6 +44,19 @@ export function ReelCarousel({
   const [internalPage, setInternalPage] = useState(0);
   const isControlled = onPageChange != null;
   const page = isControlled && controlledPage !== undefined ? controlledPage : internalPage;
+
+  const playPreview = useCallback((e: SyntheticEvent<HTMLDivElement>) => {
+    const video = e.currentTarget.querySelector('video');
+    if (!video) return;
+    void video.play().catch(() => {});
+  }, []);
+
+  const stopPreview = useCallback((e: SyntheticEvent<HTMLDivElement>) => {
+    const video = e.currentTarget.querySelector('video');
+    if (!video) return;
+    video.pause();
+    video.currentTime = 0;
+  }, []);
 
   const calcVisible = useCallback(() => {
     if (!containerRef.current) return;
@@ -160,11 +174,16 @@ export function ReelCarousel({
             onKeyDown={(e) => {
               if (e.key === 'Enter') navigate(getLocalizedPath(`/reel/${reel.id}`));
             }}
+            onMouseEnter={playPreview}
+            onMouseLeave={stopPreview}
+            onFocus={playPreview}
+            onBlur={stopPreview}
           >
             <video
               className="reel-carousel-card-video"
               muted
               playsInline
+              loop
               preload="metadata"
               src={reel.videoUrl}
             />
