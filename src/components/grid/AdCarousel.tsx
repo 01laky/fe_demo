@@ -52,24 +52,29 @@ export function AdCarousel({
   }, []);
 
   useEffect(() => {
-    calcVisible();
     const el = containerRef.current;
     if (!el) return;
+    queueMicrotask(() => calcVisible());
     const ro = new ResizeObserver(() => calcVisible());
     ro.observe(el);
     return () => ro.disconnect();
   }, [calcVisible]);
 
   useEffect(() => {
-    if (!token || faceId == null) {
-      setItems([]);
-      setLoading(false);
-      return;
-    }
     let cancelled = false;
-    (async () => {
-      setLoading(true);
-      setLoadError(false);
+    void (async () => {
+      await Promise.resolve();
+      if (!token || faceId == null) {
+        if (!cancelled) {
+          setItems([]);
+          setLoading(false);
+        }
+        return;
+      }
+      if (!cancelled) {
+        setLoading(true);
+        setLoadError(false);
+      }
       try {
         const list = await fetchAllWallTicketsForFace(token, faceId);
         if (!cancelled) setItems(list);

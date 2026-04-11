@@ -21,14 +21,17 @@ export function Reel() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!token) {
-      setLoading(false);
-      setItem(null);
-      return;
-    }
     let cancelled = false;
-    (async () => {
-      setLoading(true);
+    void (async () => {
+      await Promise.resolve();
+      if (!token) {
+        if (!cancelled) {
+          setLoading(false);
+          setItem(null);
+        }
+        return;
+      }
+      if (!cancelled) setLoading(true);
       try {
         const list = await getReels(token, faceId);
         if (!cancelled) setItem(list[0] ?? null);

@@ -40,13 +40,14 @@ export function WallTicketDetailPanel({
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    if (!open || !ticketId) {
-      setDetail(null);
-      return;
-    }
     let cancelled = false;
-    (async () => {
-      setLoading(true);
+    void (async () => {
+      await Promise.resolve();
+      if (!open || !ticketId) {
+        if (!cancelled) setDetail(null);
+        return;
+      }
+      if (!cancelled) setLoading(true);
       try {
         const d = await fetchWallTicketDetail(token, faceId, ticketId);
         if (!cancelled) {

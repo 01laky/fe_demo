@@ -24,16 +24,21 @@ export function Story() {
   const [loadError, setLoadError] = useState(false);
 
   useEffect(() => {
-    if (!token || faceId == null) {
-      setLoading(false);
-      setStory(null);
-      setLoadError(false);
-      return;
-    }
     let cancelled = false;
-    (async () => {
-      setLoading(true);
-      setLoadError(false);
+    void (async () => {
+      await Promise.resolve();
+      if (!token || faceId == null) {
+        if (!cancelled) {
+          setLoading(false);
+          setStory(null);
+          setLoadError(false);
+        }
+        return;
+      }
+      if (!cancelled) {
+        setLoading(true);
+        setLoadError(false);
+      }
       try {
         const list = await fetchStoriesForFace(token, faceId);
         if (!cancelled) {

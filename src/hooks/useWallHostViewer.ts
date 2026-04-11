@@ -16,15 +16,18 @@ export function useWallHostViewer({ enabled, token, faceId }: UseWallHostViewerO
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (!enabled || !token || faceId == null) {
-      setIsHost(null);
-      setLoading(false);
-      return;
-    }
-
     let cancelled = false;
-    setLoading(true);
-    (async () => {
+    void (async () => {
+      await Promise.resolve();
+      if (!enabled || !token || faceId == null) {
+        if (!cancelled) {
+          setIsHost(null);
+          setLoading(false);
+        }
+        return;
+      }
+
+      if (!cancelled) setLoading(true);
       try {
         const res = await fetchWallTickets(token, faceId, 1, 1);
         if (!cancelled) setIsHost(res.isHostViewer);

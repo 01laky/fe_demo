@@ -38,6 +38,7 @@ export function FaceProfileDetailPage() {
   const uid = userId ? decodeURIComponent(userId) : '';
 
   const load = useCallback(async () => {
+    await Promise.resolve();
     if (!selectedFace || !uid) return;
     setLoading(true);
     try {
@@ -56,7 +57,10 @@ export function FaceProfileDetailPage() {
   }, [selectedFace, uid, token, t]);
 
   useEffect(() => {
-    void load();
+    void (async () => {
+      await Promise.resolve();
+      await load();
+    })();
   }, [load]);
 
   const handleLike = async () => {

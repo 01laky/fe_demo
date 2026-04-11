@@ -54,15 +54,20 @@ export function ReelGrid({ page: controlledPage, onPageChange }: ReelGridProps =
   });
 
   useEffect(() => {
-    if (!token) {
-      setLoading(false);
-      setItems([]);
-      return;
-    }
     let cancelled = false;
-    (async () => {
-      setLoading(true);
-      setLoadError(false);
+    void (async () => {
+      await Promise.resolve();
+      if (!token) {
+        if (!cancelled) {
+          setLoading(false);
+          setItems([]);
+        }
+        return;
+      }
+      if (!cancelled) {
+        setLoading(true);
+        setLoadError(false);
+      }
       try {
         const data = await getReels(token, faceId);
         if (!cancelled) setItems(data);

@@ -32,14 +32,17 @@ export function Blog() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!token || faceId == null) {
-      setLoading(false);
-      setPost(null);
-      return;
-    }
     let cancelled = false;
-    (async () => {
-      setLoading(true);
+    void (async () => {
+      await Promise.resolve();
+      if (!token || faceId == null) {
+        if (!cancelled) {
+          setLoading(false);
+          setPost(null);
+        }
+        return;
+      }
+      if (!cancelled) setLoading(true);
       try {
         const list = await getBlogs(token, faceId);
         if (!cancelled) setPost(list[0] ?? null);

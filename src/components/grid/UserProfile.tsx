@@ -26,14 +26,17 @@ export function UserProfile() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (faceId == null || !token) {
-      setLoading(false);
-      setProfile(null);
-      return;
-    }
     let cancelled = false;
-    (async () => {
-      setLoading(true);
+    void (async () => {
+      await Promise.resolve();
+      if (faceId == null || !token) {
+        if (!cancelled) {
+          setLoading(false);
+          setProfile(null);
+        }
+        return;
+      }
+      if (!cancelled) setLoading(true);
       try {
         const list = await fetchAllFaceProfilesForFace(faceId, token);
         if (!cancelled) setProfile(list[0] ?? null);

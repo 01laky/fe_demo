@@ -27,6 +27,7 @@ export function NotificationsTab({ token }: { token: string }) {
   const [loading, setLoading] = useState(true);
 
   const load = useCallback(async () => {
+    await Promise.resolve();
     try {
       setLoading(true);
       const items = await getNotifications(token);
@@ -40,7 +41,10 @@ export function NotificationsTab({ token }: { token: string }) {
   }, [token, t]);
 
   useEffect(() => {
-    load();
+    void (async () => {
+      await Promise.resolve();
+      await load();
+    })();
   }, [load]);
 
   useEffect(() => {

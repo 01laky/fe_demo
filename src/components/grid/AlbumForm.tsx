@@ -42,19 +42,22 @@ export function AlbumForm({ editAlbum, onSaved, onCancel }: AlbumFormProps) {
   const isEdit = !!editAlbum;
 
   useEffect(() => {
-    if (editAlbum) {
-      setTitle(editAlbum.title);
-      setDescription(editAlbum.description ?? '');
-      setAlbumType(editAlbum.albumType);
-      setMediaType(editAlbum.mediaType);
-      setSelectedFaceIds(editAlbum.faces.map((f) => f.faceId));
-    } else {
-      setTitle('');
-      setDescription('');
-      setAlbumType(1);
-      setMediaType(1);
-      setSelectedFaceIds(allFaces.map((f) => f.id));
-    }
+    void (async () => {
+      await Promise.resolve();
+      if (editAlbum) {
+        setTitle(editAlbum.title);
+        setDescription(editAlbum.description ?? '');
+        setAlbumType(editAlbum.albumType);
+        setMediaType(editAlbum.mediaType);
+        setSelectedFaceIds(editAlbum.faces.map((f) => f.faceId));
+      } else {
+        setTitle('');
+        setDescription('');
+        setAlbumType(1);
+        setMediaType(1);
+        setSelectedFaceIds(allFaces.map((f) => f.id));
+      }
+    })();
   }, [editAlbum, allFaces]);
 
   const toggleFace = (faceId: number) => {

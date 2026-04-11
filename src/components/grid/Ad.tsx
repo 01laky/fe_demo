@@ -22,14 +22,17 @@ export function Ad() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!token || faceId == null) {
-      setLoading(false);
-      setTicket(null);
-      return;
-    }
     let cancelled = false;
-    (async () => {
-      setLoading(true);
+    void (async () => {
+      await Promise.resolve();
+      if (!token || faceId == null) {
+        if (!cancelled) {
+          setLoading(false);
+          setTicket(null);
+        }
+        return;
+      }
+      if (!cancelled) setLoading(true);
       try {
         const list = await fetchAllWallTicketsForFace(token, faceId);
         if (!cancelled) setTicket(list[0] ?? null);

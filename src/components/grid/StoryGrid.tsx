@@ -143,27 +143,32 @@ export function StoryGrid({ page: controlledPage, onPageChange }: StoryGridProps
 
   useLayoutEffect(() => {
     if (!observeGrid) {
-      setGridLayout(null);
+      queueMicrotask(() => setGridLayout(null));
       return;
     }
-    measureGridLayout();
     const el = itemsRef.current;
     if (!el) return;
+    queueMicrotask(() => measureGridLayout());
     const ro = new ResizeObserver(() => measureGridLayout());
     ro.observe(el);
     return () => ro.disconnect();
   }, [observeGrid, measureGridLayout]);
 
   useEffect(() => {
-    if (!token || faceId == null) {
-      setStories([]);
-      setLoading(false);
-      return;
-    }
     let cancelled = false;
-    (async () => {
-      setLoading(true);
-      setLoadError(false);
+    void (async () => {
+      await Promise.resolve();
+      if (!token || faceId == null) {
+        if (!cancelled) {
+          setStories([]);
+          setLoading(false);
+        }
+        return;
+      }
+      if (!cancelled) {
+        setLoading(true);
+        setLoadError(false);
+      }
       try {
         const list = await fetchStoriesForFace(token, faceId);
         if (!cancelled) setStories(list);

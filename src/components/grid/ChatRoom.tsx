@@ -37,14 +37,15 @@ export function ChatRoom({ boundChatRoomId }: ChatRoomProps) {
   );
 
   useEffect(() => {
-    if (!selectedFace || !token) {
-      setLoading(false);
-      return;
-    }
-
     let cancelled = false;
-    (async () => {
-      setLoading(true);
+    void (async () => {
+      await Promise.resolve();
+      if (!selectedFace || !token) {
+        if (!cancelled) setLoading(false);
+        return;
+      }
+
+      if (!cancelled) setLoading(true);
       try {
         if (boundChatRoomId != null) {
           const r = await getChatRoom(selectedFace.id, boundChatRoomId, token);

@@ -62,6 +62,7 @@ export function MessengerTab({ token }: { token: string }) {
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   const loadData = useCallback(async () => {
+    await Promise.resolve();
     try {
       setLoading(true);
       const [convos, reqs] = await Promise.all([
@@ -78,7 +79,10 @@ export function MessengerTab({ token }: { token: string }) {
   }, [token, t]);
 
   useEffect(() => {
-    loadData();
+    void (async () => {
+      await Promise.resolve();
+      await loadData();
+    })();
   }, [loadData]);
 
   useEffect(() => {

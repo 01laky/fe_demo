@@ -30,17 +30,20 @@ export function ReelForm({ editReel, onSaved, onCancel }: ReelFormProps) {
   const isEdit = !!editReel;
 
   useEffect(() => {
-    if (editReel) {
-      setTitle(editReel.title);
-      setDescription(editReel.description ?? '');
-      setVideoUrl(editReel.videoUrl);
-      setSelectedFaceIds(editReel.faces.map((f) => f.faceId));
-    } else {
-      setTitle('');
-      setDescription('');
-      setVideoUrl('');
-      setSelectedFaceIds([]);
-    }
+    void (async () => {
+      await Promise.resolve();
+      if (editReel) {
+        setTitle(editReel.title);
+        setDescription(editReel.description ?? '');
+        setVideoUrl(editReel.videoUrl);
+        setSelectedFaceIds(editReel.faces.map((f) => f.faceId));
+      } else {
+        setTitle('');
+        setDescription('');
+        setVideoUrl('');
+        setSelectedFaceIds([]);
+      }
+    })();
   }, [editReel]);
 
   const toggleFace = (faceId: number) => {

@@ -51,15 +51,20 @@ export function UserProfileGrid({ page: controlledPage, onPageChange }: UserProf
   });
 
   useEffect(() => {
-    if (faceId == null || !token) {
-      setProfiles([]);
-      setLoading(false);
-      return;
-    }
     let cancelled = false;
-    (async () => {
-      setLoading(true);
-      setLoadError(false);
+    void (async () => {
+      await Promise.resolve();
+      if (faceId == null || !token) {
+        if (!cancelled) {
+          setProfiles([]);
+          setLoading(false);
+        }
+        return;
+      }
+      if (!cancelled) {
+        setLoading(true);
+        setLoadError(false);
+      }
       try {
         const list = await fetchAllFaceProfilesForFace(faceId, token);
         if (!cancelled) setProfiles(list);

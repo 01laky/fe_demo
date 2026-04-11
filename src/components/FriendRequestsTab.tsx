@@ -50,6 +50,7 @@ export function FriendRequestsTab({ token }: { token: string }) {
   const listWrapperRef = useRef<HTMLDivElement>(null);
 
   const loadRequests = useCallback(async () => {
+    await Promise.resolve();
     try {
       setRequestsLoading(true);
       const reqs = await getPendingFriendRequests(token);
@@ -85,7 +86,10 @@ export function FriendRequestsTab({ token }: { token: string }) {
   }, [token, addFriendPage, searchQuery, pageSize, t]);
 
   useEffect(() => {
-    loadRequests();
+    void (async () => {
+      await Promise.resolve();
+      await loadRequests();
+    })();
   }, [loadRequests]);
 
   useLayoutEffect(() => {
@@ -96,16 +100,19 @@ export function FriendRequestsTab({ token }: { token: string }) {
       if (h <= 0) return;
       const forList = Math.max(0, h - PAGINATION_HEIGHT_PX - SAFETY_MARGIN_PX);
       const n = Math.max(MIN_PAGE_SIZE, Math.floor(forList / ITEM_HEIGHT_PX));
-      setPageSize((prev) => (prev !== n ? n : prev));
+      queueMicrotask(() => setPageSize((prev) => (prev !== n ? n : prev)));
     };
-    update();
+    queueMicrotask(update);
     const ro = new ResizeObserver(update);
     ro.observe(el);
     return () => ro.disconnect();
   }, []);
 
   useEffect(() => {
-    loadAddableUsers();
+    void (async () => {
+      await Promise.resolve();
+      await loadAddableUsers();
+    })();
   }, [loadAddableUsers]);
 
   useEffect(() => {
@@ -169,7 +176,7 @@ export function FriendRequestsTab({ token }: { token: string }) {
 
   useEffect(() => {
     if (addFriendPage > addableTotalPages && addableTotalPages > 0) {
-      setAddFriendPage(addableTotalPages);
+      queueMicrotask(() => setAddFriendPage(addableTotalPages));
     }
   }, [addFriendPage, addableTotalPages]);
 

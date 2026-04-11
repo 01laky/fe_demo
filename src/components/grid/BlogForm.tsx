@@ -59,17 +59,20 @@ export function BlogForm({ editBlog, onSaved, onCancel }: BlogFormProps) {
   const isEdit = !!editBlog;
 
   useEffect(() => {
-    if (editBlog) {
-      setTitle(editBlog.title);
-      setContent(editBlog.content);
-      setFaceId(editBlog.faceId);
-      setImageUrls(editBlog.images.map((img) => img.imageUrl));
-    } else {
-      setTitle('');
-      setContent('');
-      setFaceId(allFaces.length > 0 ? allFaces[0].id : 0);
-      setImageUrls([]);
-    }
+    void (async () => {
+      await Promise.resolve();
+      if (editBlog) {
+        setTitle(editBlog.title);
+        setContent(editBlog.content);
+        setFaceId(editBlog.faceId);
+        setImageUrls(editBlog.images.map((img) => img.imageUrl));
+      } else {
+        setTitle('');
+        setContent('');
+        setFaceId(allFaces.length > 0 ? allFaces[0].id : 0);
+        setImageUrls([]);
+      }
+    })();
   }, [editBlog, allFaces]);
 
   const addImage = () => {

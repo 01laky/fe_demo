@@ -44,14 +44,17 @@ export function ChatRoomGrid({ page: controlledPage, onPageChange }: ChatRoomGri
   });
 
   useEffect(() => {
-    if (!selectedFace || !token) {
-      setRooms([]);
-      setLoading(false);
-      return;
-    }
     let cancelled = false;
-    (async () => {
-      setLoading(true);
+    void (async () => {
+      await Promise.resolve();
+      if (!selectedFace || !token) {
+        if (!cancelled) {
+          setRooms([]);
+          setLoading(false);
+        }
+        return;
+      }
+      if (!cancelled) setLoading(true);
       try {
         const list = await listChatRooms(selectedFace.id, token);
         if (!cancelled) setRooms(list);

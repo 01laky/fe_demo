@@ -16,6 +16,7 @@ export function BlockListTab({ token }: { token: string }) {
   const [unblockingId, setUnblockingId] = useState<string | null>(null);
 
   const loadBlocked = useCallback(async () => {
+    await Promise.resolve();
     try {
       setLoading(true);
       const data = await getBlockedUsers(token);
@@ -29,7 +30,10 @@ export function BlockListTab({ token }: { token: string }) {
   }, [token, t]);
 
   useEffect(() => {
-    loadBlocked();
+    void (async () => {
+      await Promise.resolve();
+      await loadBlocked();
+    })();
   }, [loadBlocked]);
 
   const handleUnblock = async (blockedId: string) => {

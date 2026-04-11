@@ -3,7 +3,7 @@
 ## Strategy: A2 (canary bridge)
 
 - **Pinned version (exact):** `7.1.0-canary-705268dc-20260409`
-- **ESLint config:** `eslint.config.js` registers the canary plugin but enables only **`react-hooks/rules-of-hooks`** and **`react-hooks/exhaustive-deps`** (not `configs.flat.recommended`, which in canary pulls in additional experimental rules). Opt in to the full preset when the codebase is ready.
+- **ESLint config:** `eslint.config.js` extends **`reactHooks.configs.flat.recommended`** (full preset) with **`eslint-config-prettier` last**. The canary pin remains for ESLint **10** peer alignment until stable `@latest` lists `eslint@^10`.
 - **Why:** `eslint-plugin-react-hooks@latest` (7.0.x) did not declare ESLint 10 in `peerDependencies`, which produced Yarn **`YN0060`** / **`YN0086`** while this workspace uses ESLint 10. The canary line widens peers to include **`^10.0.0`**.
 - **Risk:** Canary is a pre-release channel; behavior and metadata can change without a major semver bump on npm tags.
 - **Removal trigger:** When `npm view eslint-plugin-react-hooks@latest peerDependencies` shows `eslint` including **`^10.0.0`**, bump `package.json` to that **stable** version (range as team policy allows), run `yarn install --immutable`, then `yarn validate`, `yarn test`, and `yarn build`, and delete or rewrite this document.

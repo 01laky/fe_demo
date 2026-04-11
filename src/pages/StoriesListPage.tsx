@@ -19,15 +19,18 @@ export function StoriesListPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!selectedFace || !token) {
-      setLoading(false);
-      setItems([]);
-      return;
-    }
     let cancelled = false;
-    (async () => {
+    void (async () => {
+      await Promise.resolve();
+      if (!selectedFace || !token) {
+        if (!cancelled) {
+          setLoading(false);
+          setItems([]);
+        }
+        return;
+      }
       try {
-        setLoading(true);
+        if (!cancelled) setLoading(true);
         const data = await fetchStoriesForFace(token, selectedFace.id);
         if (!cancelled) {
           setItems(data);

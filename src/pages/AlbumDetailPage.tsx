@@ -64,8 +64,11 @@ export function AlbumDetailPage() {
   }, [id, token]);
 
   useEffect(() => {
-    loadAlbum();
-    loadComments();
+    void (async () => {
+      await Promise.resolve();
+      await loadAlbum();
+      await loadComments();
+    })();
   }, [loadAlbum, loadComments]);
 
   const handleLike = async () => {

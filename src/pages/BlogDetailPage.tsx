@@ -61,8 +61,11 @@ export function BlogDetailPage() {
   }, [id, token]);
 
   useEffect(() => {
-    loadBlog();
-    loadComments();
+    void (async () => {
+      await Promise.resolve();
+      await loadBlog();
+      await loadComments();
+    })();
   }, [loadBlog, loadComments]);
 
   const handleLike = async () => {

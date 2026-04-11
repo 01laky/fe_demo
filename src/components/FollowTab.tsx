@@ -19,6 +19,7 @@ export function FollowTab({ token }: { token: string }) {
   const [unfollowingId, setUnfollowingId] = useState<string | null>(null);
 
   const loadFollowing = useCallback(async () => {
+    await Promise.resolve();
     try {
       setLoadingFollowing(true);
       const data = await getFollowing(token);
@@ -32,6 +33,7 @@ export function FollowTab({ token }: { token: string }) {
   }, [token, t]);
 
   const loadFollowers = useCallback(async () => {
+    await Promise.resolve();
     try {
       setLoadingFollowers(true);
       const data = await getFollowers(token);
@@ -45,8 +47,11 @@ export function FollowTab({ token }: { token: string }) {
   }, [token, t]);
 
   useEffect(() => {
-    loadFollowing();
-    loadFollowers();
+    void (async () => {
+      await Promise.resolve();
+      await loadFollowing();
+      await loadFollowers();
+    })();
   }, [loadFollowing, loadFollowers]);
 
   const handleUnfollow = async (userId: string) => {

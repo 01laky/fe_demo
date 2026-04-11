@@ -104,27 +104,32 @@ export function AlbumGrid({ page: controlledPage, onPageChange }: AlbumGridProps
 
   useLayoutEffect(() => {
     if (!observeGrid) {
-      setGridLayout(null);
+      queueMicrotask(() => setGridLayout(null));
       return;
     }
-    measureGridLayout();
     const el = itemsRef.current;
     if (!el) return;
+    queueMicrotask(() => measureGridLayout());
     const ro = new ResizeObserver(() => measureGridLayout());
     ro.observe(el);
     return () => ro.disconnect();
   }, [observeGrid, measureGridLayout]);
 
   useEffect(() => {
-    if (!token || faceId == null) {
-      setAlbums([]);
-      setLoading(false);
-      return;
-    }
     let cancelled = false;
-    (async () => {
-      setLoading(true);
-      setLoadError(false);
+    void (async () => {
+      await Promise.resolve();
+      if (!token || faceId == null) {
+        if (!cancelled) {
+          setAlbums([]);
+          setLoading(false);
+        }
+        return;
+      }
+      if (!cancelled) {
+        setLoading(true);
+        setLoadError(false);
+      }
       try {
         const list = await getAlbums(token, faceId);
         if (!cancelled) setAlbums(list);

@@ -54,6 +54,7 @@ export function FaceConfigProvider({ children }: { children: ReactNode }) {
 
   const loadConfig = useCallback(async () => {
     const generation = ++loadGenerationRef.current;
+    await Promise.resolve();
     try {
       setIsLoading(true);
       setError(null);
@@ -77,7 +78,10 @@ export function FaceConfigProvider({ children }: { children: ReactNode }) {
 
   // Load config on mount
   useEffect(() => {
-    loadConfig();
+    void (async () => {
+      await Promise.resolve();
+      await loadConfig();
+    })();
   }, [loadConfig]);
 
   const publicFaces = useMemo(() => allFaces.filter((f) => f.isPublic), [allFaces]);
@@ -120,8 +124,11 @@ export function FaceConfigProvider({ children }: { children: ReactNode }) {
   // Sync selected face id to storage when auto-corrected
   useEffect(() => {
     if (selectedFace && selectedFace.id !== selectedFaceId) {
-      setSelectedFaceId(selectedFace.id);
-      localStorage.setItem(STORAGE_KEY, String(selectedFace.id));
+      const id = selectedFace.id;
+      queueMicrotask(() => {
+        setSelectedFaceId(id);
+        localStorage.setItem(STORAGE_KEY, String(id));
+      });
     }
   }, [selectedFace, selectedFaceId]);
 

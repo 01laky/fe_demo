@@ -23,15 +23,18 @@ export function WallTicketsSection({ refreshKey = 0 }: WallTicketsSectionProps) 
   const [listTick, setListTick] = useState(0);
 
   useEffect(() => {
-    if (!selectedFace || !token) {
-      setLoading(false);
-      setItems([]);
-      return;
-    }
     let cancelled = false;
-    (async () => {
+    void (async () => {
+      await Promise.resolve();
+      if (!selectedFace || !token) {
+        if (!cancelled) {
+          setLoading(false);
+          setItems([]);
+        }
+        return;
+      }
       try {
-        setLoading(true);
+        if (!cancelled) setLoading(true);
         const res = await fetchWallTickets(token, selectedFace.id, page, 20);
         if (!cancelled) {
           setItems(res.items);

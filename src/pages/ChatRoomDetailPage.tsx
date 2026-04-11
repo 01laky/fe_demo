@@ -57,16 +57,22 @@ export function ChatRoomDetailPage({ roomId: roomIdProp }: { roomId: number }) {
   }, [selectedFace, token, roomIdProp]);
 
   useEffect(() => {
-    setLoading(true);
-    loadRoom();
+    void (async () => {
+      await Promise.resolve();
+      setLoading(true);
+      await loadRoom();
+    })();
   }, [loadRoom]);
 
   useEffect(() => {
-    if (!room || (!room.isHostViewer && !room.isMember)) {
-      setMessages([]);
-      return;
-    }
-    loadMessages();
+    void (async () => {
+      await Promise.resolve();
+      if (!room || (!room.isHostViewer && !room.isMember)) {
+        setMessages([]);
+        return;
+      }
+      await loadMessages();
+    })();
   }, [room, loadMessages]);
 
   useEffect(() => {

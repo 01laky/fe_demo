@@ -22,14 +22,17 @@ export function Album() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!token || faceId == null) {
-      setLoading(false);
-      setAlbum(null);
-      return;
-    }
     let cancelled = false;
-    (async () => {
-      setLoading(true);
+    void (async () => {
+      await Promise.resolve();
+      if (!token || faceId == null) {
+        if (!cancelled) {
+          setLoading(false);
+          setAlbum(null);
+        }
+        return;
+      }
+      if (!cancelled) setLoading(true);
       try {
         const list = await getAlbums(token, faceId);
         if (!cancelled) setAlbum(list[0] ?? null);

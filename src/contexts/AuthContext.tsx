@@ -81,51 +81,57 @@ export function AuthProvider({ children }: { children: ReactNode }) {
    * Clears token if expired - no point showing user as "logged in" with invalid session
    */
   useEffect(() => {
-    const loadAuthState = () => {
-      try {
-        const storedToken = localStorage.getItem(STORAGE_KEYS.TOKEN);
-        const storedUser = localStorage.getItem(STORAGE_KEYS.USER);
+    void (async () => {
+      await Promise.resolve();
+      const loadAuthState = () => {
+        try {
+          const storedToken = localStorage.getItem(STORAGE_KEYS.TOKEN);
+          const storedUser = localStorage.getItem(STORAGE_KEYS.USER);
 
-        if (storedToken && !isTokenExpired(storedToken)) {
-          setToken(storedToken);
-          setAuthToken(storedToken);
-          setIsAuthenticated(true);
+          if (storedToken && !isTokenExpired(storedToken)) {
+            setToken(storedToken);
+            setAuthToken(storedToken);
+            setIsAuthenticated(true);
 
-          if (storedUser) {
-            try {
-              setUser(JSON.parse(storedUser));
-            } catch (e) {
-              logger.warn('Failed to parse stored user data', { error: String(e) });
+            if (storedUser) {
+              try {
+                setUser(JSON.parse(storedUser));
+              } catch (e) {
+                logger.warn('Failed to parse stored user data', { error: String(e) });
+              }
             }
+          } else if (storedToken && isTokenExpired(storedToken)) {
+            localStorage.removeItem(STORAGE_KEYS.TOKEN);
+            localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
+            localStorage.removeItem(STORAGE_KEYS.USER);
+            setAuthToken(null);
+            queryClient.removeQueries({ queryKey: authKeys.all });
           }
-        } else if (storedToken && isTokenExpired(storedToken)) {
-          localStorage.removeItem(STORAGE_KEYS.TOKEN);
-          localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
-          localStorage.removeItem(STORAGE_KEYS.USER);
-          setAuthToken(null);
-          queryClient.removeQueries({ queryKey: authKeys.all });
+        } catch (error) {
+          logger.error('Failed to load auth state', error);
+        } finally {
+          setIsLoading(false);
         }
-      } catch (error) {
-        logger.error('Failed to load auth state', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+      };
 
-    loadAuthState();
+      loadAuthState();
+    })();
   }, [queryClient]);
 
   // Sync token from React Query
   useEffect(() => {
-    if (tokenData?.accessToken) {
-      setToken(tokenData.accessToken);
-      setAuthToken(tokenData.accessToken);
-      setIsAuthenticated(true);
-    } else if (!tokenLoading && !tokenData) {
-      setToken(null);
-      setAuthToken(null);
-      setIsAuthenticated(false);
-    }
+    void (async () => {
+      await Promise.resolve();
+      if (tokenData?.accessToken) {
+        setToken(tokenData.accessToken);
+        setAuthToken(tokenData.accessToken);
+        setIsAuthenticated(true);
+      } else if (!tokenLoading && !tokenData) {
+        setToken(null);
+        setAuthToken(null);
+        setIsAuthenticated(false);
+      }
+    })();
   }, [tokenData, tokenLoading]);
 
   // Listen for 401 (expired token) from API - auto logout (clear local state only, skip backend)

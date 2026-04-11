@@ -57,15 +57,20 @@ export function BlogGrid({ page: controlledPage, onPageChange }: BlogGridProps =
   });
 
   useEffect(() => {
-    if (!token || faceId == null) {
-      setPosts([]);
-      setLoading(false);
-      return;
-    }
     let cancelled = false;
-    (async () => {
-      setLoading(true);
-      setLoadError(false);
+    void (async () => {
+      await Promise.resolve();
+      if (!token || faceId == null) {
+        if (!cancelled) {
+          setPosts([]);
+          setLoading(false);
+        }
+        return;
+      }
+      if (!cancelled) {
+        setLoading(true);
+        setLoadError(false);
+      }
       try {
         const list = await getBlogs(token, faceId);
         if (!cancelled) setPosts(list);

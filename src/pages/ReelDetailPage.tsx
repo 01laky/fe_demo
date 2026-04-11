@@ -66,9 +66,12 @@ export function ReelDetailPage() {
   }, [id, token, faceId]);
 
   useEffect(() => {
-    setLoading(true);
-    loadReel();
-    loadComments();
+    void (async () => {
+      await Promise.resolve();
+      setLoading(true);
+      await loadReel();
+      await loadComments();
+    })();
   }, [loadReel, loadComments]);
 
   const handleLike = async () => {
