@@ -11,11 +11,14 @@ import axios from 'axios';
 import {
   extractFacePathFromPathname,
   prependFaceBeforeApi,
+  prependFaceBeforeHubs,
   getEffectiveFacePrefix,
   applyFacePrefixToRequestUrl,
   scopePathForCurrentFace,
   absoluteScopedUrl,
   resetLangLevelStaticRouteSegmentsCache,
+  isApiPathExemptFromFacePrefix,
+  pathAlreadyHasFaceApiPrefix,
 } from '../faceApiRouting';
 import { initI18n } from '../../i18n/config';
 
@@ -151,6 +154,51 @@ describe('Face Path Routing', () => {
       mockWindowLocation('/en/public/home');
       const scoped = scopePathForCurrentFace('/public/api/me/capabilities');
       expect(scoped).toBe('/public/api/me/capabilities');
+    });
+  });
+
+  describe('isApiPathExemptFromFacePrefix', () => {
+    it('exempts oauth2 and auth login paths', () => {
+      expect(isApiPathExemptFromFacePrefix('/api/oauth2/token')).toBe(true);
+      expect(isApiPathExemptFromFacePrefix('/api/auth/login')).toBe(true);
+      expect(isApiPathExemptFromFacePrefix('/api/users')).toBe(false);
+    });
+
+    it('ignores query string when checking exemption', () => {
+      expect(isApiPathExemptFromFacePrefix('/api/oauth2/token?x=1')).toBe(true);
+    });
+  });
+
+  describe('pathAlreadyHasFaceApiPrefix', () => {
+    it('detects face-prefixed api path', () => {
+      expect(pathAlreadyHasFaceApiPrefix('/public/api/me/capabilities')).toBe(true);
+      expect(pathAlreadyHasFaceApiPrefix('/api/me/capabilities')).toBe(false);
+    });
+  });
+
+  describe('prependFaceBeforeHubs', () => {
+    it('prefixes hub path with face', () => {
+      expect(prependFaceBeforeHubs('/hubs/chat', 'acme-corp')).toBe('/acme-corp/hubs/chat');
+    });
+
+    it('does not double-prefix when face already present', () => {
+      expect(prependFaceBeforeHubs('/acme-corp/hubs/chat', 'acme-corp')).toBe('/acme-corp/hubs/chat');
+    });
+
+    it('leaves non-hub paths unchanged', () => {
+      expect(prependFaceBeforeHubs('/api/users', 'acme-corp')).toBe('/api/users');
+    });
+  });
+
+  describe('applyFacePrefixToRequestUrl for SignalR hubs', () => {
+    const apiBase = 'https://localhost:8001';
+
+    it('rewrites hub URL with tenant face', () => {
+      mockWindowLocation('/en/acme-corp/home');
+      const face = getEffectiveFacePrefix(window.location.pathname, 'public');
+      expect(face).toBe('acme-corp');
+      const out = applyFacePrefixToRequestUrl(`${apiBase}/hubs/messenger`, face, apiBase);
+      expect(out).toBe(`${apiBase}/acme-corp/hubs/messenger`);
     });
   });
 
