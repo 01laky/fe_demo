@@ -4865,6 +4865,7 @@ __metadata:
     eslint-config-prettier: "npm:^10.1.8"
     eslint-plugin-react-hooks: "npm:7.1.0-canary-705268dc-20260409"
     eslint-plugin-react-refresh: "npm:^0.5.2"
+    form-data: "npm:^4.0.4"
     globals: "npm:^17.4.0"
     husky: "npm:^9.1.7"
     i18next: "npm:^26.0.4"
@@ -4988,7 +4989,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"form-data@npm:^4.0.5, form-data@npm:~4.0.4":
+"form-data@npm:^4.0.4, form-data@npm:^4.0.5, form-data@npm:~4.0.4":
   version: 4.0.5
   resolution: "form-data@npm:4.0.5"
   dependencies:

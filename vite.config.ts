@@ -37,6 +37,13 @@ const httpsServer = useBasicSslPlugin ? true : httpsOpt;
 // https://vitejs.dev/config/server-options.html#server-https
 export default defineConfig({
   plugins: [react(), ...(useBasicSslPlugin ? [basicSsl()] : [])],
+  css: {
+    preprocessorOptions: {
+      scss: {
+        silenceDeprecations: ['import', 'global-builtin', 'color-functions', 'if-function'],
+      },
+    },
+  },
   server: {
     port: Number(process.env.VITE_DEV_PORT) || 8081,
     host: true,
