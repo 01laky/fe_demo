@@ -18,7 +18,7 @@ interface ReelFormProps {
 
 export function ReelForm({ editReel, onSaved, onCancel }: ReelFormProps) {
   const { token } = useAuth();
-  const { allFaces } = useFaceConfig();
+  const { allFaces, selectedFace } = useFaceConfig();
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -41,10 +41,10 @@ export function ReelForm({ editReel, onSaved, onCancel }: ReelFormProps) {
         setTitle('');
         setDescription('');
         setVideoUrl('');
-        setSelectedFaceIds([]);
+        setSelectedFaceIds(selectedFace ? [selectedFace.id] : []);
       }
     })();
-  }, [editReel]);
+  }, [editReel, selectedFace]);
 
   const toggleFace = (faceId: number) => {
     setSelectedFaceIds((prev) =>
@@ -126,10 +126,10 @@ export function ReelForm({ editReel, onSaved, onCancel }: ReelFormProps) {
       </label>
 
       <fieldset className="album-form-fieldset">
-        <legend>Faces (optional)</legend>
+        <legend>Faces</legend>
         <p className="album-form-reel-faces-hint">
-          Leave none selected to show this reel on every face. Select specific faces to limit
-          visibility.
+          Creating from a face page selects the current face by default. Select multiple faces only
+          when this reel should be shared intentionally.
         </p>
         <div className="album-form-faces">
           {allFaces.map((face) => (

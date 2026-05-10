@@ -307,6 +307,28 @@
     "starsOfSix": "{{count}} of 6 stars",
     "syncingFace": "Switching face…"
   },
+  "gridBlocks": {
+    "actions": {
+      "createNew": "Create new",
+      "listPage": "List page",
+      "help": "Help",
+      "sortFilterRank": "Sort & filter rank",
+      "blockSettings": "Block settings",
+      "creationUnavailable": "Creation is not available from this block",
+      "hostCannotCreateChatRooms": "Hosts cannot create chat rooms",
+      "chatRoomCreationDisabled": "Chat room creation is disabled for this face",
+      "reportUnavailable": "Report is not available yet",
+      "favoritesUnavailable": "Favorites are not available yet"
+    },
+    "createUnsupported": {
+      "heading": "{{label}} creation is not available here",
+      "ad": "Create listings from the wall page for now.",
+      "story": "Create stories from the stories panel for now.",
+      "userProfile": "Profile creation is not available from grid tiles.",
+      "faceHostChatRoom": "Face hosts can browse chat rooms but cannot create them or participate.",
+      "chatRoomDisabled": "Creating chat rooms is not enabled for this face."
+    }
+  },
   "exitFace": {
     "button": "Exit this face",
     "hint": "You can leave this face and reset to host-only. Details appear on the next step.",

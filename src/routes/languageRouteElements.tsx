@@ -21,7 +21,8 @@ import {
 import { GuestRedirectToFaceHome, GuestRedirectToFacePath } from './GuestRedirects';
 import { SyncFaceFromProfileRoutes } from './SyncFaceFromProfileRoutes';
 import type { FaceRouteEntry, LanguageNestedRoutesProps } from './types';
-import { FacePageRouteRow } from './FacePageRouteRow';
+import { FacePageView } from '../components/FacePageView';
+import { HomePage } from '../pages/HomePage';
 
 export function renderGuestLanguageIndexRoute(): ReactElement {
   return (
@@ -36,13 +37,60 @@ export function renderGuestLanguageIndexRoute(): ReactElement {
   );
 }
 
+function facePagePublicElement(fr: FaceRouteEntry): ReactElement | null {
+  const pathNorm = fr.page.path.replace(/^\//, '');
+  const isPublicLogin = fr.isPublic && pathNorm === 'login';
+  const isPublicRegister = fr.isPublic && pathNorm === 'register';
+  const isPublicHome = fr.isPublic && pathNorm === 'home' && fr.page.pageType?.index === 'home';
+  if (isPublicLogin) {
+    return (
+      <GuestRoute>
+        <LoginPage />
+      </GuestRoute>
+    );
+  }
+  if (isPublicRegister) {
+    return (
+      <GuestRoute>
+        <RegisterPage />
+      </GuestRoute>
+    );
+  }
+  if (isPublicHome) {
+    return (
+      <GuestRoute>
+        <HomePage />
+      </GuestRoute>
+    );
+  }
+  return null;
+}
+
+/** Each item must be a literal `<Route>` — wrappers break React Router v6 child validation. */
 export function renderFaceDynamicRouteElements(
   faceRoutes: FaceRouteEntry[],
   wallRefreshKey: number
 ): ReactElement[] {
-  return faceRoutes.map((fr) => (
-    <FacePageRouteRow key={fr.key} fr={fr} wallRefreshKey={wallRefreshKey} />
-  ));
+  return faceRoutes.map((fr) => {
+    const publicEl = facePagePublicElement(fr);
+    return fr.isPublic ? (
+      <Route
+        key={fr.key}
+        path={fr.path}
+        element={publicEl ?? <FacePageView page={fr.page} wallRefreshKey={wallRefreshKey} />}
+      />
+    ) : (
+      <Route
+        key={fr.key}
+        path={fr.path}
+        element={
+          <ProtectedRoute>
+            <FacePageView page={fr.page} wallRefreshKey={wallRefreshKey} />
+          </ProtectedRoute>
+        }
+      />
+    );
+  });
 }
 
 export function renderTranslatedAndFeatureRouteElements({

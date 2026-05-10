@@ -9,7 +9,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useFaceConfig } from '../../contexts/FaceConfigContext';
 import { useLocalizedLink } from '../../hooks/useLocalizedLink';
 import { getAlbums, type AlbumItem } from '../../api/services/AlbumsService';
-import { albumCoverPlaceholderUrl } from './gridDisplayHelpers';
+import { albumCoverPlaceholderUrl, albumThumbnailPlaceholderUrl } from './gridDisplayHelpers';
 import './Album.scss';
 
 export function Album() {
@@ -71,7 +71,7 @@ export function Album() {
     );
   }
 
-  const thumbs = [0, 1, 2].map((i) => `https://picsum.photos/seed/album${album.id}_t${i}/150/150`);
+  const thumbs = [0, 1, 2].map((i) => albumThumbnailPlaceholderUrl(album.id, i));
 
   return (
     <Link

@@ -24,7 +24,7 @@ export function Reel() {
     let cancelled = false;
     void (async () => {
       await Promise.resolve();
-      if (!token) {
+      if (!token || faceId == null) {
         if (!cancelled) {
           setLoading(false);
           setItem(null);
@@ -46,7 +46,7 @@ export function Reel() {
     };
   }, [token, faceId]);
 
-  if (!token) {
+  if (!token || faceId == null) {
     return (
       <div className="reel-component reel-component--message">
         <p>Sign in to see reels.</p>

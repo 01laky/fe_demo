@@ -9,12 +9,13 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useFaceConfig } from '../../contexts/FaceConfigContext';
 import { useLocalizedLink } from '../../hooks/useLocalizedLink';
 import { getBlogs, type BlogItem } from '../../api/services/BlogsService';
+import { blogCoverPlaceholderUrl } from './gridDisplayHelpers';
 import './Blog.scss';
 
 function blogCover(blog: BlogItem): string {
   const first = blog.images?.[0]?.imageUrl;
   if (first) return first;
-  return `https://picsum.photos/seed/blogface${blog.faceId}id${blog.id}/600/400`;
+  return blogCoverPlaceholderUrl();
 }
 
 function excerpt(text: string, max = 120): string {

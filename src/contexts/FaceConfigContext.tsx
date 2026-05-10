@@ -8,11 +8,13 @@ import {
   useRef,
 } from 'react';
 import type { ReactNode } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useAuth } from './AuthContext';
 import { getFacesConfig } from '../api/config/getFacesConfig';
 import { markFaceVisited } from '../api/services/faceProfilesApi';
 import type { FaceConfig, FacesConfigResponse } from '../api/types/facesConfig';
 import { logger } from '../utils/logger';
+import { supportedLanguages } from '../i18n/constants';
 
 const STORAGE_KEY = 'selected_face_id';
 
@@ -42,6 +44,7 @@ interface FaceConfigContextType {
 const FaceConfigContext = createContext<FaceConfigContextType | undefined>(undefined);
 
 export function FaceConfigProvider({ children }: { children: ReactNode }) {
+  const location = useLocation();
   const { isAuthenticated, token } = useAuth();
   const [allFaces, setAllFaces] = useState<FacesConfigResponse>([]);
   const [selectedFaceId, setSelectedFaceId] = useState<number | null>(() => {
@@ -88,11 +91,18 @@ export function FaceConfigProvider({ children }: { children: ReactNode }) {
 
   const privateFaces = useMemo(() => allFaces.filter((f) => !f.isPublic), [allFaces]);
 
-  // Available faces depend on auth state
-  const availableFaces = useMemo(
-    () => (isAuthenticated ? privateFaces : publicFaces),
-    [isAuthenticated, publicFaces, privateFaces]
-  );
+  /** Logged-in users see private tenants plus public faces (CMS pages, demos) without logging out. */
+  const availableFaces = useMemo(() => {
+    if (!isAuthenticated) return publicFaces;
+    const seen = new Set<number>();
+    const out: FaceConfig[] = [];
+    for (const f of [...privateFaces, ...publicFaces]) {
+      if (seen.has(f.id)) continue;
+      seen.add(f.id);
+      out.push(f);
+    }
+    return out;
+  }, [isAuthenticated, publicFaces, privateFaces]);
 
   // Auto-select first available face when available faces change or stored id is invalid
   const selectedFace = useMemo(() => {
@@ -120,6 +130,19 @@ export function FaceConfigProvider({ children }: { children: ReactNode }) {
     },
     [token]
   );
+
+  // Keep context in sync when the user lands on `/:lang/:faceIndex/...` (bookmark or deep link).
+  useEffect(() => {
+    if (isLoading || availableFaces.length === 0) return;
+    const parts = location.pathname.split('/').filter(Boolean);
+    if (parts.length < 2) return;
+    const faceSegment = parts[1];
+    if (supportedLanguages.includes(faceSegment as (typeof supportedLanguages)[number])) return;
+    const match = availableFaces.find((f) => f.index.toLowerCase() === faceSegment.toLowerCase());
+    if (match && match.id !== selectedFaceId) {
+      queueMicrotask(() => selectFace(match.id));
+    }
+  }, [location.pathname, isLoading, availableFaces, selectedFaceId, selectFace]);
 
   // Sync selected face id to storage when auto-corrected
   useEffect(() => {

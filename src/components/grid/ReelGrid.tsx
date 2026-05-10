@@ -45,7 +45,7 @@ export function ReelGrid({ page: controlledPage, onPageChange }: ReelGridProps =
   const isControlled = onPageChange != null;
   const page = isControlled && controlledPage !== undefined ? controlledPage : internalPage;
 
-  const observeGrid = Boolean(token) && !loading && !loadError;
+  const observeGrid = Boolean(token) && faceId != null && !loading && !loadError;
   const { itemsPerPage, gridCols } = useFillGridPagination(itemsRef, observeGrid, isControlled, {
     gap: 10,
     minColWidth: 125,
@@ -57,7 +57,7 @@ export function ReelGrid({ page: controlledPage, onPageChange }: ReelGridProps =
     let cancelled = false;
     void (async () => {
       await Promise.resolve();
-      if (!token) {
+      if (!token || faceId == null) {
         if (!cancelled) {
           setLoading(false);
           setItems([]);
@@ -124,7 +124,7 @@ export function ReelGrid({ page: controlledPage, onPageChange }: ReelGridProps =
 
   const showInternalPagination = !isControlled;
 
-  if (!token) {
+  if (!token || faceId == null) {
     return (
       <div className="reel-grid-component reel-grid-component--message">
         <p>Sign in to see reels.</p>

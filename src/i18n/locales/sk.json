@@ -307,6 +307,28 @@
     "starsOfSix": "{{count}} z 6 hviezdičiek",
     "syncingFace": "Prepínam face…"
   },
+  "gridBlocks": {
+    "actions": {
+      "createNew": "Vytvoriť nový",
+      "listPage": "Stránka zoznamu",
+      "help": "Pomoc",
+      "sortFilterRank": "Triedenie a poradie",
+      "blockSettings": "Nastavenia bloku",
+      "creationUnavailable": "Vytváranie nie je dostupné z tohto bloku",
+      "hostCannotCreateChatRooms": "Hostitelia nemôžu vytvárať chat miestnosti",
+      "chatRoomCreationDisabled": "Vytváranie chat miestností je pre tento face vypnuté",
+      "reportUnavailable": "Nahlasovanie zatiaľ nie je dostupné",
+      "favoritesUnavailable": "Obľúbené zatiaľ nie sú dostupné"
+    },
+    "createUnsupported": {
+      "heading": "Vytvorenie {{label}} tu nie je dostupné",
+      "ad": "Listingy zatiaľ vytvárajte zo stránky steny.",
+      "story": "Stories zatiaľ vytvárajte z panelu stories.",
+      "userProfile": "Vytváranie profilov nie je dostupné z grid dlaždíc.",
+      "faceHostChatRoom": "Hostitelia môžu chat miestnosti prehliadať, ale nemôžu ich vytvárať ani sa zapájať.",
+      "chatRoomDisabled": "Vytváranie chat miestností nie je pre tento face zapnuté."
+    }
+  },
   "exitFace": {
     "button": "Opustiť tento face",
     "hint": "Môžete opustiť face a vrátiť sa len na rolu hostiteľa. Podrobnosti v ďalšom kroku.",

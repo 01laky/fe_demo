@@ -29,7 +29,7 @@ const MEDIA_TYPES = [
 
 export function AlbumForm({ editAlbum, onSaved, onCancel }: AlbumFormProps) {
   const { token } = useAuth();
-  const { allFaces } = useFaceConfig();
+  const { allFaces, selectedFace } = useFaceConfig();
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -55,10 +55,10 @@ export function AlbumForm({ editAlbum, onSaved, onCancel }: AlbumFormProps) {
         setDescription('');
         setAlbumType(1);
         setMediaType(1);
-        setSelectedFaceIds(allFaces.map((f) => f.id));
+        setSelectedFaceIds(selectedFace ? [selectedFace.id] : []);
       }
     })();
-  }, [editAlbum, allFaces]);
+  }, [editAlbum, selectedFace]);
 
   const toggleFace = (faceId: number) => {
     setSelectedFaceIds((prev) =>

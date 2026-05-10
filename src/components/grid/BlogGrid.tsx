@@ -14,12 +14,13 @@ import {
   useSyncedPaginationReport,
 } from '../../hooks/usePaginationParentSync';
 import { useFillGridPagination } from '../../hooks/useFillGridPagination';
+import { blogCoverPlaceholderUrl } from './gridDisplayHelpers';
 import './BlogGrid.scss';
 
 function blogCover(blog: BlogItem): string {
   const first = blog.images?.[0]?.imageUrl;
   if (first) return first;
-  return `https://picsum.photos/seed/bloggrid${blog.id}/400/250`;
+  return blogCoverPlaceholderUrl();
 }
 
 function excerpt(text: string, max = 100): string {

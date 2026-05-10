@@ -13,6 +13,7 @@ import {
   useStablePaginationEmit,
   useSyncedPaginationReport,
 } from '../../hooks/usePaginationParentSync';
+import { blogCoverPlaceholderUrl } from './gridDisplayHelpers';
 import './BlogCarousel.scss';
 
 const CARD_WIDTH = 200;
@@ -21,7 +22,7 @@ const CARD_GAP = 8;
 function blogCover(blog: BlogItem): string {
   const first = blog.images?.[0]?.imageUrl;
   if (first) return first;
-  return `https://picsum.photos/seed/blogcar${blog.id}/400/250`;
+  return blogCoverPlaceholderUrl();
 }
 
 export interface BlogCarouselProps {

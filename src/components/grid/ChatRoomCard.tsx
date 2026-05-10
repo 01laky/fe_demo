@@ -1,4 +1,5 @@
 import type { FaceChatRoomDto } from '../../api/services/ChatRoomsService';
+import { profileAvatarUrl } from './gridDisplayHelpers';
 import './ChatRoomCard.scss';
 
 interface ChatRoomCardProps {
@@ -22,8 +23,7 @@ function formatActivity(iso: string | null): string {
 }
 
 export function ChatRoomCard({ room, onOpen, interactive = true }: ChatRoomCardProps) {
-  const seed = `cr${room.id}`;
-  const avatar = `https://picsum.photos/seed/${seed}/100/100`;
+  const avatar = profileAvatarUrl(`chat-room-${room.id}`, null);
   const activity = formatActivity(room.lastMessageAt);
   const badges = [room.isSystemManaged ? 'System' : null, room.isPublic ? 'Public' : 'Private']
     .filter(Boolean)

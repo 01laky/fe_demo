@@ -307,6 +307,28 @@
     "starsOfSix": "{{count}} z 6 hvězdiček",
     "syncingFace": "Přepínám face…"
   },
+  "gridBlocks": {
+    "actions": {
+      "createNew": "Vytvořit nový",
+      "listPage": "Stránka seznamu",
+      "help": "Nápověda",
+      "sortFilterRank": "Řazení a pořadí",
+      "blockSettings": "Nastavení bloku",
+      "creationUnavailable": "Vytváření není dostupné z tohoto bloku",
+      "hostCannotCreateChatRooms": "Hostitelé nemohou vytvářet chat místnosti",
+      "chatRoomCreationDisabled": "Vytváření chat místností je pro tento face vypnuté",
+      "reportUnavailable": "Nahlašování zatím není dostupné",
+      "favoritesUnavailable": "Oblíbené zatím nejsou dostupné"
+    },
+    "createUnsupported": {
+      "heading": "Vytvoření {{label}} zde není dostupné",
+      "ad": "Listingy zatím vytvářejte ze stránky zdi.",
+      "story": "Stories zatím vytvářejte z panelu stories.",
+      "userProfile": "Vytváření profilů není dostupné z grid dlaždic.",
+      "faceHostChatRoom": "Hostitelé mohou chat místnosti prohlížet, ale nemohou je vytvářet ani se zapojovat.",
+      "chatRoomDisabled": "Vytváření chat místností není pro tento face zapnuté."
+    }
+  },
   "exitFace": {
     "button": "Opustit tento face",
     "hint": "Face můžete opustit a vrátit se jen na roli hostitele. Podrobnosti v dalším kroku.",

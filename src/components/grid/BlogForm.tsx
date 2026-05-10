@@ -44,7 +44,7 @@ const MAX_IMAGES = 3;
 
 export function BlogForm({ editBlog, onSaved, onCancel }: BlogFormProps) {
   const { token } = useAuth();
-  const { allFaces } = useFaceConfig();
+  const { allFaces, selectedFace } = useFaceConfig();
   const quillRef = useRef<unknown>(null);
 
   const [title, setTitle] = useState('');
@@ -68,11 +68,11 @@ export function BlogForm({ editBlog, onSaved, onCancel }: BlogFormProps) {
       } else {
         setTitle('');
         setContent('');
-        setFaceId(allFaces.length > 0 ? allFaces[0].id : 0);
+        setFaceId(selectedFace?.id ?? 0);
         setImageUrls([]);
       }
     })();
-  }, [editBlog, allFaces]);
+  }, [editBlog, selectedFace]);
 
   const addImage = () => {
     const url = newImageUrl.trim();

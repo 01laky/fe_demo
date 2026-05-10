@@ -78,7 +78,7 @@ export function ReelCarousel({
     let cancelled = false;
     void (async () => {
       await Promise.resolve();
-      if (!token) {
+      if (!token || faceId == null) {
         if (!cancelled) {
           setLoading(false);
           setItems([]);
@@ -130,7 +130,7 @@ export function ReelCarousel({
 
   const showInternalNav = !isControlled;
 
-  if (!token) {
+  if (!token || faceId == null) {
     return (
       <div className="reel-carousel-component reel-carousel-component--message" ref={containerRef}>
         <p>Sign in to see reels.</p>

@@ -31,6 +31,7 @@ import {
   BookOpen,
   type LucideIcon,
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useFaceConfig } from '../contexts/FaceConfigContext';
 import { useAnimatedGradientStyle } from '../hooks/useAnimatedGradient';
 import { useLocalizedLink } from '../hooks/useLocalizedLink';
@@ -143,6 +144,7 @@ export function ComponentBlock({
   editReel,
   onReelSaved,
 }: ComponentBlockProps) {
+  const { t } = useTranslation('common');
   const { selectedFace } = useFaceConfig();
   const { openGridCreate } = useGridTopPanel();
   const navigate = useNavigate();
@@ -159,6 +161,28 @@ export function ComponentBlock({
   const isChatRoomType = CHAT_ROOM_COMPONENT_TYPES.includes(componentType);
   const isFaceHost = selectedFace?.myFaceRoleName === 'FACE_HOST';
   const canCreateChatRoom = isChatRoomType && selectedFace?.chatRoomsCreate === true && !isFaceHost;
+  const unsupportedCreateType =
+    componentType === 'ad' ||
+    componentType === 'adGrid' ||
+    componentType === 'adCarousel' ||
+    componentType === 'story' ||
+    componentType === 'storyGrid' ||
+    componentType === 'storyCarousel' ||
+    componentType === 'userProfile' ||
+    componentType === 'userProfileGrid' ||
+    componentType === 'userProfileCarousel';
+  const createDisabled = (isChatRoomType && !canCreateChatRoom) || unsupportedCreateType;
+  const createTitle =
+    isChatRoomType && !canCreateChatRoom
+      ? isFaceHost
+        ? t('gridBlocks.actions.hostCannotCreateChatRooms', 'Hosts cannot create chat rooms')
+        : t(
+            'gridBlocks.actions.chatRoomCreationDisabled',
+            'Chat room creation is disabled for this face'
+          )
+      : unsupportedCreateType
+        ? t('gridBlocks.actions.creationUnavailable', 'Creation is not available from this block')
+        : t('gridBlocks.actions.createNew', 'Create new');
 
   type LocalPanelMode = 'edit' | 'sort' | 'block';
   const [localPanelOpen, setLocalPanelOpen] = useState(false);
@@ -261,16 +285,10 @@ export function ComponentBlock({
             <button
               type="button"
               className="component-block-action-btn"
-              title={
-                isChatRoomType && !canCreateChatRoom
-                  ? isFaceHost
-                    ? 'Hosts cannot create chat rooms'
-                    : 'Chat room creation is disabled for this face'
-                  : 'Create new'
-              }
-              disabled={isChatRoomType && !canCreateChatRoom}
+              title={createTitle}
+              disabled={createDisabled}
               onClick={() => {
-                if (isChatRoomType && !canCreateChatRoom) return;
+                if (createDisabled) return;
                 openGridCreate(componentType);
               }}
             >
@@ -279,34 +297,51 @@ export function ComponentBlock({
             <button
               type="button"
               className="component-block-action-btn"
-              title="List page"
+              title={t('gridBlocks.actions.listPage', 'List page')}
               onClick={() =>
                 navigate(getLocalizedPath(`/list/${COMPONENT_TYPE_ID[componentType]}`))
               }
             >
               <List size={16} />
             </button>
-            <button type="button" className="component-block-action-btn" title="Report">
+            <button
+              type="button"
+              className="component-block-action-btn"
+              title={t('gridBlocks.actions.reportUnavailable', 'Report is not available yet')}
+              disabled
+            >
               <Flag size={16} />
             </button>
-            <button type="button" className="component-block-action-btn" title="Help">
+            <button
+              type="button"
+              className="component-block-action-btn"
+              title={t('gridBlocks.actions.help', 'Help')}
+            >
               <HelpCircle size={16} />
             </button>
             <button
               type="button"
               className="component-block-action-btn"
-              title="Sort & filter rank"
+              title={t('gridBlocks.actions.sortFilterRank', 'Sort & filter rank')}
               onClick={() => openLocalPanel('sort')}
             >
               <ArrowUpDown size={16} />
             </button>
-            <button type="button" className="component-block-action-btn" title="Add to favorites">
+            <button
+              type="button"
+              className="component-block-action-btn"
+              title={t(
+                'gridBlocks.actions.favoritesUnavailable',
+                'Favorites are not available yet'
+              )}
+              disabled
+            >
               <Star size={16} />
             </button>
             <button
               type="button"
               className="component-block-action-btn"
-              title="Block settings"
+              title={t('gridBlocks.actions.blockSettings', 'Block settings')}
               onClick={() => openLocalPanel('block')}
             >
               <Settings size={16} />
