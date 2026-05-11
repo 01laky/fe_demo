@@ -13,7 +13,6 @@ import {
   Info,
   Settings,
   UserCircle,
-  Globe,
   Menu,
   Users,
   IdCard,
@@ -273,7 +272,7 @@ export function Header({
                 <span className="header-profile-status">{t('header.guest')}</span>
               </div>
               <div className="header-profile-avatar">
-                <Globe size={24} />
+                <UserCircle size={32} strokeWidth={1.6} />
               </div>
             </div>
           )}
