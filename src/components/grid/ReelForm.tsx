@@ -8,6 +8,7 @@ import {
   type ReelItem,
   type CreateReelDto,
 } from '../../api/services/ReelsService';
+import { getSubmittedForApprovalCopy } from '../../utils/contentModeration';
 import './AlbumForm.scss';
 
 interface ReelFormProps {
@@ -26,6 +27,7 @@ export function ReelForm({ editReel, onSaved, onCancel }: ReelFormProps) {
   const [selectedFaceIds, setSelectedFaceIds] = useState<number[]>([]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
   const isEdit = !!editReel;
 
@@ -58,6 +60,7 @@ export function ReelForm({ editReel, onSaved, onCancel }: ReelFormProps) {
 
     setSaving(true);
     setError('');
+    setSuccess('');
 
     try {
       const dto: CreateReelDto = {
@@ -72,6 +75,7 @@ export function ReelForm({ editReel, onSaved, onCancel }: ReelFormProps) {
         result = await updateReel(editReel!.id, dto, token);
       } else {
         result = await createReel(dto, token);
+        setSuccess(getSubmittedForApprovalCopy('reel'));
       }
       onSaved?.(result);
     } catch (err) {
@@ -86,6 +90,7 @@ export function ReelForm({ editReel, onSaved, onCancel }: ReelFormProps) {
       <h3 className="album-form-heading">{isEdit ? 'Edit Reel' : 'Create Reel'}</h3>
 
       {error && <div className="album-form-error">{error}</div>}
+      {success && <div className="album-form-success">{success}</div>}
 
       <label className="album-form-label">
         Title

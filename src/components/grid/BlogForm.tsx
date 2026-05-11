@@ -9,6 +9,7 @@ import {
   type BlogItem,
   type CreateBlogDto,
 } from '../../api/services/BlogsService';
+import { getSubmittedForApprovalCopy } from '../../utils/contentModeration';
 import './BlogForm.scss';
 
 interface BlogFormProps {
@@ -54,6 +55,7 @@ export function BlogForm({ editBlog, onSaved, onCancel }: BlogFormProps) {
   const [newImageUrl, setNewImageUrl] = useState('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
   const isEdit = !!editBlog;
 
@@ -91,6 +93,7 @@ export function BlogForm({ editBlog, onSaved, onCancel }: BlogFormProps) {
 
     setSaving(true);
     setError('');
+    setSuccess('');
 
     try {
       const dto: CreateBlogDto = {
@@ -105,6 +108,7 @@ export function BlogForm({ editBlog, onSaved, onCancel }: BlogFormProps) {
         result = await updateBlog(editBlog!.id, dto, token);
       } else {
         result = await createBlog(dto, token);
+        setSuccess(getSubmittedForApprovalCopy('blog'));
       }
       onSaved?.(result);
     } catch (err) {
@@ -119,6 +123,7 @@ export function BlogForm({ editBlog, onSaved, onCancel }: BlogFormProps) {
       <h3 className="blog-form-heading">{isEdit ? 'Edit Blog' : 'Create Blog'}</h3>
 
       {error && <div className="blog-form-error">{error}</div>}
+      {success && <div className="blog-form-success">{success}</div>}
 
       <label className="blog-form-label">
         Title

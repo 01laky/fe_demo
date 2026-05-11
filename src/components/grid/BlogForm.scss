@@ -21,6 +21,15 @@
   font-size: 0.8125rem;
 }
 
+.blog-form-success {
+  padding: 0.4rem 0.6rem;
+  border-radius: 6px;
+  background: rgba(25, 135, 84, 0.25);
+  border: 1px solid rgba(25, 135, 84, 0.45);
+  color: #9ee6bf;
+  font-size: 0.8125rem;
+}
+
 .blog-form-label {
   display: flex;
   flex-direction: column;

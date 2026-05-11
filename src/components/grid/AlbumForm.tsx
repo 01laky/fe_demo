@@ -8,6 +8,7 @@ import {
   type AlbumItem,
   type CreateAlbumDto,
 } from '../../api/services/AlbumsService';
+import { getSubmittedForApprovalCopy } from '../../utils/contentModeration';
 import './AlbumForm.scss';
 
 interface AlbumFormProps {
@@ -38,6 +39,7 @@ export function AlbumForm({ editAlbum, onSaved, onCancel }: AlbumFormProps) {
   const [selectedFaceIds, setSelectedFaceIds] = useState<number[]>([]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
   const isEdit = !!editAlbum;
 
@@ -72,6 +74,7 @@ export function AlbumForm({ editAlbum, onSaved, onCancel }: AlbumFormProps) {
 
     setSaving(true);
     setError('');
+    setSuccess('');
 
     try {
       const dto: CreateAlbumDto = {
@@ -87,6 +90,7 @@ export function AlbumForm({ editAlbum, onSaved, onCancel }: AlbumFormProps) {
         result = await updateAlbum(editAlbum!.id, dto, token);
       } else {
         result = await createAlbum(dto, token);
+        setSuccess(getSubmittedForApprovalCopy('album'));
       }
       onSaved?.(result);
     } catch (err) {
@@ -101,6 +105,7 @@ export function AlbumForm({ editAlbum, onSaved, onCancel }: AlbumFormProps) {
       <h3 className="album-form-heading">{isEdit ? 'Edit Album' : 'Create Album'}</h3>
 
       {error && <div className="album-form-error">{error}</div>}
+      {success && <div className="album-form-success">{success}</div>}
 
       <label className="album-form-label">
         Title

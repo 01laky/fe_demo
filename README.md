@@ -27,8 +27,15 @@ From an engineering perspective, this submodule is also a playground for a moder
 - Generated OpenAPI API client with typed services and models.
 - React contexts for auth, face configuration, grid top panel state, and shared application state.
 - Neutral local placeholders and explicit empty states instead of relying on external placeholder services.
+- Submitted-for-approval feedback for user-created albums, blogs, and reels so users understand new content is waiting for moderation and is not public yet.
 - Docker-first local development that works both standalone and through the root monorepo scripts.
 - Validation through ESLint, TypeScript checks, Vitest tests, and Cypress smoke coverage.
+
+## User Content Approval UX
+
+Albums, blogs, and reels created from the user-facing frontend now follow the moderation workflow described in the monorepo guide. The frontend sends create requests through the existing content services, receives backend-owned approval status fields, and shows clear submitted-for-approval copy after a successful create.
+
+The UI deliberately does not mark freshly created content as public. Public grid/list/detail visibility remains enforced by the backend, and creator-facing copy avoids exposing internal AI flags, model trace IDs, or policy details. Local helpers in `src/utils/contentModeration.ts` map approval/AI statuses to safe labels and are covered by Vitest tests.
 
 ## Route And Grid Rendering
 

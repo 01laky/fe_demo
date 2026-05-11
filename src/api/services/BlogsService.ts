@@ -1,5 +1,6 @@
 import { authAwareFetch } from '../utils/authAwareFetch';
 import { absoluteScopedUrl } from '../faceApiRouting';
+import type { AiReviewStatus, ContentApprovalStatus } from '../../utils/contentModeration';
 
 async function apiFetch(path: string, options: RequestInit & { token?: string }) {
   const token = options.token;
@@ -31,6 +32,11 @@ export interface BlogItem {
   likesCount: number;
   commentsCount: number;
   isLikedByMe?: boolean;
+  approvalStatus?: ContentApprovalStatus;
+  aiReviewStatus?: AiReviewStatus;
+  aiReviewUserMessage?: string | null;
+  humanDecisionReason?: string | null;
+  creatorStatusLabel?: string;
   createdAt: string;
   updatedAt: string | null;
 }
