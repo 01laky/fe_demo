@@ -35,7 +35,7 @@ From an engineering perspective, this submodule is also a playground for a moder
 
 Albums, blogs, and reels created from the user-facing frontend now follow the moderation workflow described in the monorepo guide. The frontend sends create requests through the existing content services, receives backend-owned approval status fields, and shows clear submitted-for-approval copy after a successful create.
 
-The UI deliberately does not mark freshly created content as public. Public grid/list/detail visibility remains enforced by the backend, and creator-facing copy avoids exposing internal AI flags, model trace IDs, or policy details. Local helpers in `src/utils/contentModeration.ts` map approval/AI statuses to safe labels and are covered by Vitest tests.
+The UI deliberately does not mark freshly created content as public. Public grid/list/detail visibility remains enforced by the backend, and creator-facing copy avoids exposing internal AI flags, model trace IDs, or policy details. Local helpers in `src/utils/contentModeration.ts` map approval/AI statuses to safe labels, trim creator-safe reasons, and drive reusable moderation badges for creator-owned pending/rejected/removed items returned by the API. These helpers are covered by Vitest tests.
 
 ## Route And Grid Rendering
 

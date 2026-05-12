@@ -19,6 +19,7 @@ import { useFaceConfig } from '../../contexts/FaceConfigContext';
 import { useLocalizedLink } from '../../hooks/useLocalizedLink';
 import { getAlbums, type AlbumItem } from '../../api/services/AlbumsService';
 import { albumCoverPlaceholderUrl } from './gridDisplayHelpers';
+import { CreatorModerationBadge } from './CreatorModerationBadge';
 import {
   useStablePaginationEmit,
   useSyncedPaginationReport,
@@ -230,6 +231,12 @@ export function AlbumGrid({ page: controlledPage, onPageChange }: AlbumGridProps
               </div>
               <div className="album-grid-card-info">
                 <span className="album-grid-card-title">{album.title}</span>
+                <CreatorModerationBadge
+                  approvalStatus={album.approvalStatus}
+                  aiReviewStatus={album.aiReviewStatus}
+                  aiReviewUserMessage={album.aiReviewUserMessage}
+                  humanDecisionReason={album.humanDecisionReason}
+                />
                 <span className="album-grid-card-count">
                   ♥ {album.likesCount} · 💬 {album.commentsCount}
                 </span>

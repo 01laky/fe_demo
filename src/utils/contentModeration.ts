@@ -38,3 +38,18 @@ export function getSubmittedForApprovalCopy(contentType: 'album' | 'blog' | 'ree
   const label = contentType.charAt(0).toUpperCase() + contentType.slice(1);
   return `${label} submitted for approval. Your content was created and is waiting for review.`;
 }
+
+export function shouldShowCreatorStatusBadge(
+  approvalStatus?: ContentApprovalStatus | string | null
+) {
+  return Boolean(approvalStatus && approvalStatus !== 'Approved');
+}
+
+export function getCreatorSafeReason(
+  aiReviewUserMessage?: string | null,
+  humanDecisionReason?: string | null
+) {
+  const message = aiReviewUserMessage?.trim() || humanDecisionReason?.trim();
+  if (!message) return null;
+  return message.length <= 240 ? message : `${message.slice(0, 240)}...`;
+}

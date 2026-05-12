@@ -9,6 +9,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useFaceConfig } from '../../contexts/FaceConfigContext';
 import { useLocalizedLink } from '../../hooks/useLocalizedLink';
 import { getBlogs, type BlogItem } from '../../api/services/BlogsService';
+import { CreatorModerationBadge } from './CreatorModerationBadge';
 import {
   useStablePaginationEmit,
   useSyncedPaginationReport,
@@ -159,6 +160,12 @@ export function BlogGrid({ page: controlledPage, onPageChange }: BlogGridProps =
                 {new Date(post.createdAt).toLocaleDateString()}
               </span>
               <span className="blog-grid-card-title">{post.title}</span>
+              <CreatorModerationBadge
+                approvalStatus={post.approvalStatus}
+                aiReviewStatus={post.aiReviewStatus}
+                aiReviewUserMessage={post.aiReviewUserMessage}
+                humanDecisionReason={post.humanDecisionReason}
+              />
               <span className="blog-grid-card-excerpt">{excerpt(post.content)}</span>
             </div>
           </div>

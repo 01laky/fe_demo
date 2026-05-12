@@ -17,6 +17,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useFaceConfig } from '../../contexts/FaceConfigContext';
 import { useLocalizedLink } from '../../hooks/useLocalizedLink';
 import { getReels, type ReelItem } from '../../api/services/ReelsService';
+import { CreatorModerationBadge } from './CreatorModerationBadge';
 import {
   useStablePaginationEmit,
   useSyncedPaginationReport,
@@ -176,6 +177,12 @@ export function ReelGrid({ page: controlledPage, onPageChange }: ReelGridProps =
             />
             <div className="reel-grid-card-overlay">
               <span className="reel-grid-card-title">{reel.title}</span>
+              <CreatorModerationBadge
+                approvalStatus={reel.approvalStatus}
+                aiReviewStatus={reel.aiReviewStatus}
+                aiReviewUserMessage={reel.aiReviewUserMessage}
+                humanDecisionReason={reel.humanDecisionReason}
+              />
               <span className="reel-grid-card-likes">♥ {reel.likesCount}</span>
             </div>
           </div>
