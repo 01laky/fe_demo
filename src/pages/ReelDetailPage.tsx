@@ -87,7 +87,7 @@ export function ReelDetailPage() {
 
   // Ownership + moderation policy: mirrors backend creator edit/delete rules for header UX only.
   const isOwner = Boolean(user?.id && reel?.creatorId && user.id === reel.creatorId);
-  const showEditUi = isOwner && canOwnerUseModerationEditorActions(reel?.approvalStatus);
+  const showEditUi = canOwnerUseModerationEditorActions(isOwner, reel?.approvalStatus);
   const showDeleteUi = isOwner && isCreatorModerationDeleteAllowed(reel?.approvalStatus);
 
   useEffect(() => {

@@ -80,7 +80,7 @@ export function BlogDetailPage() {
 
   // Ownership + moderation policy: mirrors backend creator edit/delete rules for header UX only.
   const isOwner = Boolean(user?.id && blog?.creatorId && user.id === blog.creatorId);
-  const showEditUi = isOwner && canOwnerUseModerationEditorActions(blog?.approvalStatus);
+  const showEditUi = canOwnerUseModerationEditorActions(isOwner, blog?.approvalStatus);
   const showDeleteUi = isOwner && isCreatorModerationDeleteAllowed(blog?.approvalStatus);
 
   useEffect(() => {

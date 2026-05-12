@@ -83,7 +83,7 @@ export function AlbumDetailPage() {
 
   // Ownership + moderation policy: mirrors backend creator edit/delete rules for header UX only.
   const isOwner = Boolean(user?.id && album?.creatorId && user.id === album.creatorId);
-  const showEditUi = isOwner && canOwnerUseModerationEditorActions(album?.approvalStatus);
+  const showEditUi = canOwnerUseModerationEditorActions(isOwner, album?.approvalStatus);
   const showDeleteUi = isOwner && isCreatorModerationDeleteAllowed(album?.approvalStatus);
 
   useEffect(() => {
