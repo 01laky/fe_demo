@@ -560,3 +560,14 @@ lsof -ti:8081 | xargs kill -9
 - **Yarn PnP**: See `YARN_PNP.md` for Yarn Plug'n'Play information
 - **API Client**: See `src/api/README.md` for API client documentation
 - **i18n**: See `src/i18n/README.md` for internationalization setup
+
+## Central documentation (`many_faces_main`)
+
+Inside the monorepo checkout, relative links such as [`../docs/guides/ai-assisted-content-approval.md`](../docs/guides/ai-assisted-content-approval.md) resolve to the shared `docs/` tree.
+
+When viewing **only** this repository on GitHub, open the canonical monorepo paths instead:
+
+- [Documentation hub](https://github.com/01laky/many_faces_main/blob/main/docs/README.md) (`docs/README.md`)
+- [AI-assisted content approval](https://github.com/01laky/many_faces_main/blob/main/docs/guides/ai-assisted-content-approval.md)
+- [Git submodules workflow](https://github.com/01laky/many_faces_main/blob/main/docs/guides/git-submodules.md)
+- [Development and CI](https://github.com/01laky/many_faces_main/blob/main/docs/guides/development.md) (`scripts/lint-all.sh`, `scripts/ci-local.sh`)
