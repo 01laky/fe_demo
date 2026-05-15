@@ -119,7 +119,7 @@ describe('getFacesConfig', () => {
 
     // Assert
     expect(mockedAxios.get).toHaveBeenCalledWith(
-      `${env.apiUrl}/api/faces/config`,
+      `${env.apiUrl}/${env.defaultFacePrefix}/api/faces/config`,
       expect.objectContaining({})
     );
     expect(result).toEqual(mockFacesConfig);

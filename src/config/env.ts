@@ -45,6 +45,27 @@ function getEnv(key: string, defaultValue: string): string {
   return import.meta.env[key] || defaultValue;
 }
 
+/**
+ * Docker FE HTTP entry (host :9080 → nginx :80) is used when embedded Chromium rejects mkcert
+ * (`ERR_CERT_AUTHORITY_INVALID` on https://localhost:9081). Same-origin API then goes through
+ * nginx → `be-demo-dev:8000` (see `dev/nginx-fe-wait/nginx.conf`), not to https://localhost:8001 in the browser.
+ *
+ * HTTPS entry (host :9081 → nginx :443) uses the same proxy pattern so Safari only trusts nginx TLS;
+ * a direct browser call to https://localhost:8001 often fails there (no HTTP status in Network tab).
+ */
+function resolveApiUrl(): string {
+  const fallback = 'https://localhost:8001';
+  const fromEnv = getEnv('VITE_API_URL', fallback);
+  if (!import.meta.env.DEV) return fromEnv;
+  if (
+    typeof window !== 'undefined' &&
+    (window.location.port === '9080' || window.location.port === '9081')
+  ) {
+    return window.location.origin;
+  }
+  return fromEnv;
+}
+
 /** Accepts `true` / `1` as truthy; any other explicit string is treated as false. */
 function getBoolEnv(key: string, defaultValue: boolean): boolean {
   const value = import.meta.env[key];
@@ -55,7 +76,7 @@ function getBoolEnv(key: string, defaultValue: boolean): boolean {
 /** Live singleton parsed once at module load — tests should override via `collectEnvValidationErrors` clones. */
 export const env: EnvConfig = {
   // API Configuration
-  apiUrl: getEnv('VITE_API_URL', 'https://localhost:8001'),
+  apiUrl: resolveApiUrl(),
   defaultFacePrefix: getEnv('VITE_DEFAULT_FACE_PREFIX', 'public'),
 
   // OAuth2 Configuration
