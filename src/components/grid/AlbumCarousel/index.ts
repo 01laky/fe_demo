@@ -1,0 +1,1 @@
+export { AlbumCarousel } from './AlbumCarousel';

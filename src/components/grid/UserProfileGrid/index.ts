@@ -1,0 +1,1 @@
+export { UserProfileGrid } from './UserProfileGrid';

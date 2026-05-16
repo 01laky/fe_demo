@@ -1,0 +1,1 @@
+export { ChatRoomCarousel } from './ChatRoomCarousel';
