@@ -45,7 +45,8 @@ export function RegisterCompletePage() {
     password: yup
       .string()
       .required(t('pages.register.validation.passwordRequired'))
-      .min(4, t('pages.register.validation.passwordMinLength'))
+      // SHV2 BE-A3: align client validation with API Identity:Password:RequiredLength (12 in Production/Testing).
+      .min(12, t('pages.register.validation.passwordMinLength'))
       .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, t('pages.register.validation.passwordPattern')),
     confirmPassword: yup
       .string()
