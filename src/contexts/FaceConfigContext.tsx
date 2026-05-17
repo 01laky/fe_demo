@@ -14,6 +14,7 @@ import { getFacesConfig } from '../api/config/getFacesConfig';
 import { markFaceVisited } from '../api/services/faceProfilesApi';
 import type { FaceConfig, FacesConfigResponse } from '../api/types/facesConfig';
 import { logger } from '../utils/logger';
+import { buildFaceHomePath, resolvePostAuthHomePath } from '../utils/faceHomePath';
 import { supportedLanguages } from '../i18n/constants';
 
 const STORAGE_KEY = 'selected_face_id';
@@ -35,10 +36,12 @@ interface FaceConfigContextType {
   isLoading: boolean;
   /** Config load error */
   error: Error | null;
-  /** Reload config from backend */
-  reload: () => Promise<void>;
+  /** Reload config from backend (optional token when auth state has not flushed yet). */
+  reload: (authToken?: string | null) => Promise<FacesConfigResponse>;
   /** Get the home page path for the selected face (e.g., "/basic/home") */
   getFaceHomePath: () => string;
+  /** Home path after sign-in — prefers a private face when the user has one. */
+  getPostAuthHomePath: () => string;
 }
 
 const FaceConfigContext = createContext<FaceConfigContextType | undefined>(undefined);
@@ -55,29 +58,40 @@ export function FaceConfigProvider({ children }: { children: ReactNode }) {
   const [error, setError] = useState<Error | null>(null);
   const loadGenerationRef = useRef(0);
 
-  const loadConfig = useCallback(async () => {
-    const generation = ++loadGenerationRef.current;
-    await Promise.resolve();
-    try {
-      setIsLoading(true);
-      setError(null);
-      const config = await getFacesConfig(isAuthenticated ? (token ?? undefined) : undefined);
-      if (generation !== loadGenerationRef.current) return;
-      setAllFaces(config);
-      logger.info('Faces config loaded', {
-        faceCount: config.length,
-        isAuthenticated,
-      });
-    } catch (err) {
-      if (generation !== loadGenerationRef.current) return;
-      logger.error('Failed to load faces config', { error: err });
-      setError(err instanceof Error ? err : new Error('Unknown error'));
-    } finally {
-      if (generation === loadGenerationRef.current) {
-        setIsLoading(false);
+  const loadConfig = useCallback(
+    async (authToken?: string | null): Promise<FacesConfigResponse> => {
+      const generation = ++loadGenerationRef.current;
+      await Promise.resolve();
+      const effectiveToken =
+        authToken !== undefined && authToken !== null
+          ? authToken
+          : isAuthenticated
+            ? (token ?? undefined)
+            : undefined;
+      try {
+        setIsLoading(true);
+        setError(null);
+        const config = await getFacesConfig(effectiveToken);
+        if (generation !== loadGenerationRef.current) return config;
+        setAllFaces(config);
+        logger.info('Faces config loaded', {
+          faceCount: config.length,
+          isAuthenticated: Boolean(effectiveToken),
+        });
+        return config;
+      } catch (err) {
+        if (generation !== loadGenerationRef.current) return [];
+        logger.error('Failed to load faces config', { error: err });
+        setError(err instanceof Error ? err : new Error('Unknown error'));
+        return [];
+      } finally {
+        if (generation === loadGenerationRef.current) {
+          setIsLoading(false);
+        }
       }
-    }
-  }, [isAuthenticated, token]);
+    },
+    [isAuthenticated, token]
+  );
 
   // Load config on mount
   useEffect(() => {
@@ -155,14 +169,14 @@ export function FaceConfigProvider({ children }: { children: ReactNode }) {
     }
   }, [selectedFace, selectedFaceId]);
 
-  // Build the face home path from the selected face's "home" page type
   const getFaceHomePath = useCallback((): string => {
     if (!selectedFace) return '/homepage';
-    const homePage = selectedFace.pages.find((p) => p.pageType.index === 'home');
-    if (!homePage) return '/homepage';
-    const pagePath = homePage.path.startsWith('/') ? homePage.path.slice(1) : homePage.path;
-    return `/${selectedFace.index}/${pagePath}`;
+    return buildFaceHomePath(selectedFace);
   }, [selectedFace]);
+
+  const getPostAuthHomePath = useCallback((): string => {
+    return resolvePostAuthHomePath(availableFaces);
+  }, [availableFaces]);
 
   return (
     <FaceConfigContext.Provider
@@ -177,6 +191,7 @@ export function FaceConfigProvider({ children }: { children: ReactNode }) {
         error,
         reload: loadConfig,
         getFaceHomePath,
+        getPostAuthHomePath,
       }}
     >
       {children}

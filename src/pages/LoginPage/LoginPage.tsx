@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'react-toastify';
 import { useAuth } from '../../contexts/AuthContext';
 import { useFaceConfig } from '../../contexts/FaceConfigContext';
+import { pickPreferredPrivateFace, resolvePostAuthHomePath } from '../../utils/faceHomePath';
 import { logger } from '../../utils/logger';
 import { useLocalizedLink } from '../../hooks/useLocalizedLink';
 import { FormField } from '../../components/radix/FormField';
@@ -27,7 +28,7 @@ export function LoginPage() {
   const location = useLocation();
   // const { lang } = useParams<{ lang: string }>(); // Removed unused variable
   const getLocalizedPath = useLocalizedLink();
-  const { getFaceHomePath } = useFaceConfig();
+  const { getPostAuthHomePath, reload, selectFace } = useFaceConfig();
 
   // Create validation schema with yup
   const validationSchema = yup.object({
@@ -53,20 +54,25 @@ export function LoginPage() {
   });
 
   // Redirect if already authenticated
-  const from = (location.state as { from?: string })?.from || getLocalizedPath(getFaceHomePath());
+  const from = (location.state as { from?: string })?.from;
+  const defaultAfterAuth = getLocalizedPath(getPostAuthHomePath());
 
   if (isAuthenticated) {
-    navigate(from, { replace: true });
+    navigate(from ?? defaultAfterAuth, { replace: true });
     return null;
   }
 
   const onSubmit = async (data: LoginFormData) => {
     try {
-      await login(data.email, data.password, { rememberMe: data.rememberMe });
+      const accessToken = await login(data.email, data.password, { rememberMe: data.rememberMe });
       logger.info('Login successful, redirecting', { email: data.email });
       toast.success(t('pages.login.success') || 'Login successful!');
-      // Redirect to face home page after successful login
-      const faceHomePath = getLocalizedPath(getFaceHomePath());
+      const config = await reload(accessToken);
+      const preferredPrivate = pickPreferredPrivateFace(config);
+      if (preferredPrivate) {
+        selectFace(preferredPrivate.id);
+      }
+      const faceHomePath = from ?? getLocalizedPath(resolvePostAuthHomePath(config));
       navigate(faceHomePath, { replace: true });
     } catch (error) {
       logger.error('Login failed', error);

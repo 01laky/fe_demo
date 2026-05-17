@@ -53,7 +53,11 @@ interface AuthContextType {
   token: string | null;
 
   // Actions
-  login: (username: string, password: string, options?: { rememberMe?: boolean }) => Promise<void>;
+  login: (
+    username: string,
+    password: string,
+    options?: { rememberMe?: boolean }
+  ) => Promise<string | undefined>;
   logout: () => Promise<void>;
   refreshAuth: () => Promise<void>;
 }
@@ -265,7 +269,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
           logger.info('Login successful', { username });
           // Toast will be shown in LoginPage component
+          return result.accessToken;
         }
+        return undefined;
       } catch (error) {
         logger.error('Login failed', error);
         setIsAuthenticated(false);

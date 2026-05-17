@@ -13,7 +13,7 @@ interface GuestRouteProps {
  */
 export function GuestRoute({ children }: GuestRouteProps) {
   const { isAuthenticated, isLoading } = useAuth();
-  const { getFaceHomePath } = useFaceConfig();
+  const { getPostAuthHomePath } = useFaceConfig();
   const getLocalizedPath = useLocalizedLink();
 
   // Show nothing while checking authentication
@@ -23,7 +23,7 @@ export function GuestRoute({ children }: GuestRouteProps) {
 
   // If user is authenticated, redirect to face home page
   if (isAuthenticated) {
-    return <Navigate to={getLocalizedPath(getFaceHomePath())} replace />;
+    return <Navigate to={getLocalizedPath(getPostAuthHomePath())} replace />;
   }
 
   // If user is not authenticated, show the route
